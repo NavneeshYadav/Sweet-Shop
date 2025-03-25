@@ -13,6 +13,8 @@ const Navbar = () => {
     { id: 1, name: 'Home', href: '/' },
     { id: 2, name: 'Products', href: '/products' },
     { id: 3, name: 'About', href: '/about' },
+    { id: 4, name: 'Admin', href: '/admin' },
+    
   ];
 
   const authLinks = [

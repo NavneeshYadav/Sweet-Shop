@@ -3,15 +3,29 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
+import SubmitButton from '@/components/SubmitButton';
 
 const LoginForm = () => {
+    const [fullName, setFullName] = useState('');
+    const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+    const [errors, setErrors] = useState<{ fullName?: string; phone?: string; email?: string; password?: string }>({});
 
     const validate = () => {
         const newErrors: typeof errors = {};
+
+        if (!fullName.trim()) {
+            newErrors.fullName = 'Full Name is required';
+        }
+
+        if (!phone) {
+            newErrors.phone = 'Phone number is required';
+        } else if (!/^\d{10}$/.test(phone)) {
+            newErrors.phone = 'Invalid phone number (must be 10 digits)';
+        }
+
         if (!email) {
             newErrors.email = 'Email is required';
         } else if (!/\S+@\S+\.\S+/.test(email)) {
@@ -31,7 +45,7 @@ const LoginForm = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (validate()) {
-            console.log('Form Submitted:', { email, password });
+            console.log('Form Submitted:', { fullName, phone, email, password });
             // handle login logic here
         }
     };
@@ -40,6 +54,35 @@ const LoginForm = () => {
         <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
             <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800">Login</h2>
             <form onSubmit={handleSubmit} noValidate>
+                
+                {/* Full Name Field */}
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <input
+                        type="text"
+                        className={`w-full px-3 py-2 border ${errors.fullName ? 'border-red-500' : 'border-gray-300'
+                            } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400`}
+                        placeholder="John Doe"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                    />
+                    {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>}
+                </div>
+
+                {/* Phone Number Field */}
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                    <input
+                        type="text"
+                        className={`w-full px-3 py-2 border ${errors.phone ? 'border-red-500' : 'border-gray-300'
+                            } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400`}
+                        placeholder="1234567890"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                    />
+                    {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+                </div>
+
                 {/* Email Field */}
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
@@ -77,12 +120,7 @@ const LoginForm = () => {
                 </div>
 
                 {/* Submit */}
-                <button
-                    type="submit"
-                    className="w-full bg-orange-400 text-white py-2 rounded-md hover:bg-orange-500 transition"
-                >
-                    Login
-                </button>
+                <SubmitButton label="Login" />
             </form>
             <div className="mt-4 text-center">
                 <p className="text-sm text-gray-600">
