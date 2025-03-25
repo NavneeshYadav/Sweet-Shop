@@ -12,15 +12,15 @@ const Navbar = () => {
   const toggleMenu = () => setIsOpen(!isOpen);
 
   const mainLinks = [
-    { navid: 1, name: 'Home', href: '/' },
-    { navid: 2, name: 'Products', href: '/products' },
-    { navid: 3, name: 'About', href: '/about' },
-    { navid: 4, name: 'Admin', href: '/admin' },
+    { navId: 1, name: 'Home', href: '/' },
+    { navId: 2, name: 'Products', href: '/products' },
+    { navId: 3, name: 'About', href: '/about' },
+    { navId: 4, name: 'Admin', href: '/admin' },
   ];
 
   const authLinks = [
-    { navid: 4, name: 'Login', href: '/login', style: 'text-orange-400 hover:text-orange-300 transition' },
-    { navid: 5, name: 'Signup', href: '/signup', style: 'bg-orange-400 text-white px-4 py-1.5 rounded-md hover:bg-orange-300 transition' },
+    { navId: 4, name: 'Login', href: '/login', style: 'text-orange-400 hover:text-orange-300 transition' },
+    { navId: 5, name: 'Signup', href: '/signup', style: 'bg-orange-400 text-white px-4 py-1.5 rounded-md hover:bg-orange-300 transition' },
   ];
 
   return (
@@ -33,7 +33,7 @@ const Navbar = () => {
             <div className="hidden md:flex space-x-6">
               {mainLinks.map((link) => (
                 <Link 
-                  key={link.navid} 
+                  key={link.navId} 
                   href={link.href} 
                   className={`transition ${pathname === link.href ? 'text-orange-600 font-semibold' : 'text-orange-400 hover:text-orange-300'}`}
                 >
@@ -46,7 +46,7 @@ const Navbar = () => {
           {/* Right side - Auth Links */}
           <div className="hidden md:flex space-x-4 items-center">
             {authLinks.map((link) => (
-              <Link key={link.navid} href={link.href} className={link.style}>
+              <Link key={link.navId} href={link.href} className={link.style}>
                 {link.name}
               </Link>
             ))}
@@ -70,7 +70,7 @@ const Navbar = () => {
         <div className="md:hidden px-4 pb-4 space-y-2 transition-all duration-300 ease-in-out">
           {mainLinks.map((link) => (
             <Link 
-              key={link.navid} 
+              key={link.navId} 
               href={link.href} 
               className={`block py-2 transition ${pathname === link.href ? 'text-orange-600 font-semibold' : 'text-orange-400 hover:text-orange-300'}`}
             >
@@ -80,7 +80,7 @@ const Navbar = () => {
           <hr className="border-gray-200" />
           {authLinks.map((link) => (
             <Link
-              key={link.navid}
+              key={link.navId}
               href={link.href}
               className={`block py-2 ${link.name === 'Signup' ? 'bg-orange-400 text-white rounded-md text-center hover:bg-orange-300' : 'text-orange-400 hover:text-orange-300'}`}
             >
