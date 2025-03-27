@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { Menu, ShoppingCart, X } from 'lucide-react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,8 +19,9 @@ const Navbar = () => {
   ];
 
   const authLinks = [
-    { navId: 4, name: 'Login', href: '/login', style: 'text-orange-400 hover:text-orange-300 transition' },
-    { navId: 5, name: 'Signup', href: '/signup', style: 'bg-orange-400 text-white px-4 py-1.5 rounded-md hover:bg-orange-300 transition' },
+    { navId: 5, name: <ShoppingCart />, href: '/cart', style: 'text-orange-400 hover:text-orange-300 transition' },
+    { navId: 6, name: 'Login', href: '/login', style: 'text-orange-400 hover:text-orange-300 transition' },
+    { navId: 7, name: 'Signup', href: '/signup', style: 'bg-orange-400 text-white px-4 py-1.5 rounded-md hover:bg-orange-300 transition' },
   ];
 
   return (
@@ -32,9 +33,9 @@ const Navbar = () => {
             <div className="text-xl font-bold text-orange-400">Lalu Cake Wale</div>
             <div className="hidden md:flex space-x-6">
               {mainLinks.map((link) => (
-                <Link 
-                  key={link.navId} 
-                  href={link.href} 
+                <Link
+                  key={link.navId}
+                  href={link.href}
                   className={`transition ${pathname === link.href ? 'text-orange-600 font-semibold' : 'text-orange-400 hover:text-orange-300'}`}
                 >
                   {link.name}
@@ -69,9 +70,9 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden px-4 pb-4 space-y-2 transition-all duration-300 ease-in-out">
           {mainLinks.map((link) => (
-            <Link 
-              key={link.navId} 
-              href={link.href} 
+            <Link
+              key={link.navId}
+              href={link.href}
               className={`block py-2 transition ${pathname === link.href ? 'text-orange-600 font-semibold' : 'text-orange-400 hover:text-orange-300'}`}
             >
               {link.name}
