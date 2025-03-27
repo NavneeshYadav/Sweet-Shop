@@ -8,6 +8,7 @@ import { Menu, ShoppingCart, X } from 'lucide-react';
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname(); // Get current path
+  const cartItemCount = 3; // Replace with actual count from state or Redux
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -19,7 +20,6 @@ const Navbar = () => {
   ];
 
   const authLinks = [
-    { navId: 5, name: <ShoppingCart />, href: '/cart', style: 'text-orange-400 hover:text-orange-300 transition' },
     { navId: 6, name: 'Login', href: '/login', style: 'text-orange-400 hover:text-orange-300 transition' },
     { navId: 7, name: 'Signup', href: '/signup', style: 'bg-orange-400 text-white px-4 py-1.5 rounded-md hover:bg-orange-300 transition' },
   ];
@@ -46,6 +46,16 @@ const Navbar = () => {
 
           {/* Right side - Auth Links */}
           <div className="hidden md:flex space-x-4 items-center">
+            <div className="relative">
+              <Link href="/cart" className="text-orange-400 hover:text-orange-300 transition relative">
+                <ShoppingCart />
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                    {cartItemCount}
+                  </span>
+                )}
+              </Link>
+            </div>
             {authLinks.map((link) => (
               <Link key={link.navId} href={link.href} className={link.style}>
                 {link.name}
@@ -53,8 +63,16 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
+          {/* Mobile Menu Button with Cart Icon */}
+          <div className="md:hidden flex items-center space-x-4">
+            <Link href="/cart" className="text-orange-400 hover:text-orange-300 relative">
+              <ShoppingCart />
+              {cartItemCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                  {cartItemCount}
+                </span>
+              )}
+            </Link>
             <button
               onClick={toggleMenu}
               className="text-orange-400 hover:text-orange-300 focus:outline-none"
