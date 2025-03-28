@@ -122,7 +122,8 @@ const ProductList: React.FC = () => {
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex justify-center mt-6 space-x-2">
+        <div className="flex flex-wrap justify-center mt-6 gap-2">
+          {/* Previous Button */}
           <button
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
@@ -130,17 +131,50 @@ const ProductList: React.FC = () => {
           >
             Previous
           </button>
-          {[...Array(totalPages)].map((_, index) => (
-            <button
-              key={index + 1}
-              onClick={() => setCurrentPage(index + 1)}
-              className={`px-4 py-2 ${
-                currentPage === index + 1 ? "bg-orange-600 text-white" : "bg-gray-200"
-              } rounded`}
-            >
-              {index + 1}
-            </button>
-          ))}
+
+          {/* Page Numbers */}
+          <div className="flex space-x-1">
+            {/* Always Show First Page */}
+            {currentPage > 2 && (
+              <>
+                <button
+                  onClick={() => setCurrentPage(1)}
+                  className={`px-3 py-2 ${currentPage === 1 ? "bg-orange-600 text-white" : "bg-gray-200"} rounded`}
+                >
+                  1
+                </button>
+                {currentPage > 3 && <span className="px-2 py-2">...</span>}
+              </>
+            )}
+
+            {/* Show Previous, Current & Next Pages */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((page) => page >= currentPage - 1 && page <= currentPage + 1)
+              .map((page) => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-2 ${currentPage === page ? "bg-orange-600 text-white" : "bg-gray-200"} rounded`}
+                >
+                  {page}
+                </button>
+              ))}
+
+            {/* Always Show Last Page */}
+            {currentPage < totalPages - 1 && (
+              <>
+                {currentPage < totalPages - 2 && <span className="px-2 py-2">...</span>}
+                <button
+                  onClick={() => setCurrentPage(totalPages)}
+                  className={`px-3 py-2 ${currentPage === totalPages ? "bg-orange-600 text-white" : "bg-gray-200"} rounded`}
+                >
+                  {totalPages}
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Next Button */}
           <button
             onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
