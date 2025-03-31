@@ -35,6 +35,22 @@ const ProductAdminList: React.FC = () => {
     }
   };
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+  
+    const formData = new FormData();
+    formData.append("image", file);
+  
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+  
+    const data = await res.json();
+    setNewProduct({ ...newProduct, image: data.imageUrl });
+  };
+  
   return (
     <div className="max-w-7xl mx-auto px-4 mt-6">
       <h2 className="text-2xl font-bold text-orange-600 mb-4">Manage Products</h2>
@@ -65,7 +81,8 @@ const ProductAdminList: React.FC = () => {
             onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
             className="border p-2 rounded-md w-full mb-2"
           />
-          <input type="file"  className="border p-2 rounded-md w-full mb-2" />
+         <input type="file" accept="image/*" onChange={handleImageUpload} className="border p-2 rounded-md w-full mb-2" />
+
           <button onClick={handleAddProduct} className="bg-blue-500 text-white px-4 py-2 rounded-md">
             Add Product
           </button>
