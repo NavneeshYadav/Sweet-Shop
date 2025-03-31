@@ -65,13 +65,7 @@ const ProductAdminList: React.FC = () => {
             onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
             className="border p-2 rounded-md w-full mb-2"
           />
-          <input
-            type="text"
-            placeholder="Image URL"
-            value={newProduct.image}
-            onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
-            className="border p-2 rounded-md w-full mb-2"
-          />
+          <input type="file"  className="border p-2 rounded-md w-full mb-2" />
           <button onClick={handleAddProduct} className="bg-blue-500 text-white px-4 py-2 rounded-md">
             Add Product
           </button>
