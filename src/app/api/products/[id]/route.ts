@@ -12,11 +12,12 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, context: { params: { id: string } }) {
   await connectToDatabase();
   try {
-    await Product.findByIdAndDelete(params.id);
-    return NextResponse.json({ message: "Product deleted" }, { status: 204 });
+    const { id } = await context.params; // Destructure params properly
+    await Product.findByIdAndDelete(id);
+    return NextResponse.json({ message: "Product deleted" }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: (error as Error).message }, { status: 400 });
   }
