@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import Product from "@/models/Product";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, context: { params: { id: string } }) {
   await connectToDatabase();
   try {
-    const updatedProduct = await Product.findByIdAndUpdate(params.id, await req.json(), { new: true });
+    const { id } = await context.params; 
+    const updatedProduct = await Product.findByIdAndUpdate(id, await req.json(), { new: true });
     return NextResponse.json(updatedProduct, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: (error as Error).message }, { status: 400 });

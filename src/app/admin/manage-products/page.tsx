@@ -30,28 +30,33 @@ const ProductAdminList: React.FC = () => {
     fetchProducts();
   }, []);
 
-  // **Handle Image Upload**
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+// **Handle Image Upload with Preview**
+const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
 
-    const formData = new FormData();
-    formData.append("image", file);
+  // Create a preview URL
+  const previewUrl = URL.createObjectURL(file);
+  setNewProduct({ ...newProduct, image: previewUrl });
 
-    try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+  const formData = new FormData();
+  formData.append("image", file);
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Image upload failed");
+  try {
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
 
-      setNewProduct({ ...newProduct, image: data.imageUrl });
-    } catch (error) {
-      console.error("Image upload error:", error);
-    }
-  };
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Image upload failed");
+
+    setNewProduct({ ...newProduct, image: data.imageUrl });
+  } catch (error) {
+    console.error("Image upload error:", error);
+  }
+};
+
 
   // **Handle Add Product**
   const handleAddProduct = async () => {
@@ -134,7 +139,9 @@ const ProductAdminList: React.FC = () => {
             className="border p-2 rounded-md w-full mb-2"
           />
           <input type="file" accept="image/*" onChange={handleImageUpload} className="border p-2 rounded-md w-full mb-2" />
-
+          {newProduct.image && (
+  <img src={newProduct.image} alt="Preview" className="w-32 h-32 object-cover rounded-md mb-2" />
+)}
           <button onClick={handleAddProduct} className="bg-blue-500 text-white px-4 py-2 rounded-md" disabled={loading}>
             {loading ? "Adding..." : "Add Product"}
           </button>

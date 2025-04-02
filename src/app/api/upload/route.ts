@@ -13,7 +13,6 @@ export async function POST(req: NextRequest) {
     // Convert Blob to Buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-
     // Upload to Cloudinary
     const uploadResult = await new Promise<{ secure_url: string }>((resolve, reject) => {
       cloudinary.uploader.upload_stream({ folder: "product_images" }, (error, result) => {
