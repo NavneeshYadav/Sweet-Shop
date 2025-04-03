@@ -31,13 +31,16 @@ const ProductAdminList: React.FC = () => {
   }, []);
 
 // **Handle Image Upload with Preview**
-const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+const handleImageUpload = async (
+  event: React.ChangeEvent<HTMLInputElement>,
+  setImage?: (url: string) => void
+) => {
   const file = event.target.files?.[0];
   if (!file) return;
 
   // Create a preview URL
   const previewUrl = URL.createObjectURL(file);
-  setNewProduct({ ...newProduct, image: previewUrl });
+  setImage ? setImage(previewUrl) : setNewProduct({ ...newProduct, image: previewUrl });
 
   const formData = new FormData();
   formData.append("image", file);
@@ -51,11 +54,12 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Image upload failed");
 
-    setNewProduct({ ...newProduct, image: data.imageUrl });
+    setImage ? setImage(data.imageUrl) : setNewProduct({ ...newProduct, image: data.imageUrl });
   } catch (error) {
     console.error("Image upload error:", error);
   }
 };
+
 
 
   // **Handle Add Product**
@@ -150,7 +154,7 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {products.map((product) => (
-          <ProductAdminCard key={product._id} product={product} onUpdate={handleUpdate} onDelete={handleDelete} />
+          <ProductAdminCard key={product._id} product={product} onUpdate={handleUpdate} onDelete={handleDelete} onImage={handleImageUpload}/>
         ))}
       </div>
     </div>
