@@ -79,7 +79,7 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
           <h3 className="text-lg font-semibold mt-3 text-orange-600">{product.name}</h3>
           <p className="text-gray-500">${product.price.toFixed(2)}</p>
           <p
-            className={`text-sm ${product.availableInStocks ? "text-green-600" : "text-red-600"
+            className={`text-sm ${product.availableInStocks ? "text-green-600 font-bold" : "text-red-600 font-bold"
               }`}
           >
             {product.availableInStocks ? "In Stock" : "Out of Stock"}

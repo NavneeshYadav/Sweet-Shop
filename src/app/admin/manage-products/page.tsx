@@ -154,15 +154,18 @@ const ProductAdminList: React.FC = () => {
           {newProduct.image && (
             <img src={newProduct.image} alt="Preview" className="w-32 h-32 object-cover rounded-md mb-2" />
           )}
-          <input
-            type="checkbox"
-            checked={newProduct.availableInStocks}
-            onChange={(e) =>
-              setNewProduct({ ...newProduct, availableInStocks: e.target.checked })
-            }
-            className="mr-2"
-          />
-          <label className="text-gray-700">Available in Stock</label>
+          <div className="flex items-center w-full mb-2">
+            <input
+              type="checkbox"
+              checked={newProduct.availableInStocks}
+              onChange={(e) =>
+                setNewProduct({ ...newProduct, availableInStocks: e.target.checked })
+              }
+              className="mr-2"
+            />
+            <label className="text-gray-700">Available in Stock</label>
+          </div>
+
 
           <button onClick={handleAddProduct} className="bg-blue-500 text-white px-4 py-2 rounded-md" disabled={loading}>
             {loading ? "Adding..." : "Add Product"}
