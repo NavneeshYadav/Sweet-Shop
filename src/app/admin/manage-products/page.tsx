@@ -7,11 +7,19 @@ interface Product {
   name: string;
   price: number;
   image: string;
+  availableInStocks: boolean;
 }
+
 
 const ProductAdminList: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [newProduct, setNewProduct] = useState<Product>({ name: "", price: 0, image: "" });
+  const [newProduct, setNewProduct] = useState<Product>({
+    name: "",
+    price: 0,
+    image: "",
+    availableInStocks: true,
+  });
+
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -30,35 +38,35 @@ const ProductAdminList: React.FC = () => {
     fetchProducts();
   }, []);
 
-// **Handle Image Upload with Preview**
-const handleImageUpload = async (
-  event: React.ChangeEvent<HTMLInputElement>,
-  setImage?: (url: string) => void
-) => {
-  const file = event.target.files?.[0];
-  if (!file) return;
+  // **Handle Image Upload with Preview**
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    setImage?: (url: string) => void
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  // Create a preview URL
-  const previewUrl = URL.createObjectURL(file);
-  setImage ? setImage(previewUrl) : setNewProduct({ ...newProduct, image: previewUrl });
+    // Create a preview URL
+    const previewUrl = URL.createObjectURL(file);
+    setImage ? setImage(previewUrl) : setNewProduct({ ...newProduct, image: previewUrl });
 
-  const formData = new FormData();
-  formData.append("image", file);
+    const formData = new FormData();
+    formData.append("image", file);
 
-  try {
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Image upload failed");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Image upload failed");
 
-    setImage ? setImage(data.imageUrl) : setNewProduct({ ...newProduct, image: data.imageUrl });
-  } catch (error) {
-    console.error("Image upload error:", error);
-  }
-};
+      setImage ? setImage(data.imageUrl) : setNewProduct({ ...newProduct, image: data.imageUrl });
+    } catch (error) {
+      console.error("Image upload error:", error);
+    }
+  };
 
 
 
@@ -78,7 +86,7 @@ const handleImageUpload = async (
       if (!res.ok) throw new Error(data.error || "Failed to add product");
 
       setProducts([...products, data]); // Update UI with new product
-      setNewProduct({ name: "", price: 0, image: "" });
+      setNewProduct({ name: "", price: 0, image: "", availableInStocks: true });
       setShowForm(false);
     } catch (error) {
       console.error("Add product error:", error);
@@ -144,8 +152,18 @@ const handleImageUpload = async (
           />
           <input type="file" accept="image/*" onChange={handleImageUpload} className="border p-2 rounded-md w-full mb-2" />
           {newProduct.image && (
-  <img src={newProduct.image} alt="Preview" className="w-32 h-32 object-cover rounded-md mb-2" />
-)}
+            <img src={newProduct.image} alt="Preview" className="w-32 h-32 object-cover rounded-md mb-2" />
+          )}
+          <input
+            type="checkbox"
+            checked={newProduct.availableInStocks}
+            onChange={(e) =>
+              setNewProduct({ ...newProduct, availableInStocks: e.target.checked })
+            }
+            className="mr-2"
+          />
+          <label className="text-gray-700">Available in Stock</label>
+
           <button onClick={handleAddProduct} className="bg-blue-500 text-white px-4 py-2 rounded-md" disabled={loading}>
             {loading ? "Adding..." : "Add Product"}
           </button>
@@ -154,7 +172,7 @@ const handleImageUpload = async (
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {products.map((product) => (
-          <ProductAdminCard key={product._id} product={product} onUpdate={handleUpdate} onDelete={handleDelete} onImage={handleImageUpload}/>
+          <ProductAdminCard key={product._id} product={product} onUpdate={handleUpdate} onDelete={handleDelete} onImage={handleImageUpload} />
         ))}
       </div>
     </div>

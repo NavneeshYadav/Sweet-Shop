@@ -6,7 +6,9 @@ interface Product {
   name: string;
   price: number;
   image: string;
+  availableInStocks: boolean;
 }
+
 
 interface ProductAdminProps {
   product: Product;
@@ -46,6 +48,16 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
           {editedProduct.image && (
             <img src={editedProduct.image} alt="Preview" className="w-32 h-32 object-cover rounded-md mb-2" />
           )}
+          <label className="flex items-center gap-2 mb-2">
+            <input
+              type="checkbox"
+              checked={editedProduct.availableInStocks}
+              onChange={(e) =>
+                setEditedProduct({ ...editedProduct, availableInStocks: e.target.checked })
+              }
+            />
+            <span>Available in Stock</span>
+          </label>
 
           <button
             onClick={() => {
@@ -66,6 +78,14 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
           <img src={product.image} alt={product.name} className="w-full h-40 object-cover rounded-md" />
           <h3 className="text-lg font-semibold mt-3 text-orange-600">{product.name}</h3>
           <p className="text-gray-500">${product.price.toFixed(2)}</p>
+          <p
+            className={`text-sm ${product.availableInStocks ? "text-green-600" : "text-red-600"
+              }`}
+          >
+            {product.availableInStocks ? "In Stock" : "Out of Stock"}
+          </p>
+
+
           <div className="flex gap-2 mt-3">
             <button onClick={() => setIsEditing(true)} className="bg-blue-500 text-white px-4 py-2 rounded-md">
               Edit
