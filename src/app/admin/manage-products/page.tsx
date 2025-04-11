@@ -7,8 +7,10 @@ interface Product {
   name: string;
   price: number;
   image: string;
+  imagePublicId?: string;
   availableInStocks: boolean;
 }
+
 
 
 const ProductAdminList: React.FC = () => {
@@ -17,11 +19,13 @@ const ProductAdminList: React.FC = () => {
     name: "",
     price: 0,
     image: "",
+    imagePublicId: "",
     availableInStocks: true,
   });
 
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
 
   // **Fetch Products from API**
   useEffect(() => {
@@ -46,7 +50,6 @@ const ProductAdminList: React.FC = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Create a preview URL
     const previewUrl = URL.createObjectURL(file);
     setImage ? setImage(previewUrl) : setNewProduct({ ...newProduct, image: previewUrl });
 
@@ -54,6 +57,7 @@ const ProductAdminList: React.FC = () => {
     formData.append("image", file);
 
     try {
+      setImageUploading(true); // Start uploading
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
@@ -62,17 +66,26 @@ const ProductAdminList: React.FC = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Image upload failed");
 
-      setImage ? setImage(data.imageUrl) : setNewProduct({ ...newProduct, image: data.imageUrl });
+      // Update newProduct with image URL and publicId
+      setNewProduct((prev) => ({
+        ...prev,
+        image: data.imageUrl,
+        imagePublicId: data.publicId,
+      }));
     } catch (error) {
       console.error("Image upload error:", error);
+    } finally {
+      setImageUploading(false); // Done uploading
     }
   };
+
 
 
 
   // **Handle Add Product**
   const handleAddProduct = async () => {
     if (!newProduct.name || newProduct.price <= 0 || !newProduct.image) return;
+    console.log(newProduct);
 
     setLoading(true);
     try {
@@ -86,7 +99,11 @@ const ProductAdminList: React.FC = () => {
       if (!res.ok) throw new Error(data.error || "Failed to add product");
 
       setProducts([...products, data]); // Update UI with new product
-      setNewProduct({ name: "", price: 0, image: "", availableInStocks: true });
+      setNewProduct({
+        ...newProduct,
+        image: data.imageUrl,
+        imagePublicId: data.publicId,
+      });
       setShowForm(false);
     } catch (error) {
       console.error("Add product error:", error);
@@ -167,8 +184,12 @@ const ProductAdminList: React.FC = () => {
           </div>
 
 
-          <button onClick={handleAddProduct} className="bg-blue-500 text-white px-4 py-2 rounded-md" disabled={loading}>
-            {loading ? "Adding..." : "Add Product"}
+          <button onClick={handleAddProduct} className="bg-blue-500 text-white px-4 py-2 rounded-md" disabled={loading || imageUploading}>
+            {imageUploading
+              ? "Uploading Image..."
+              : loading
+                ? "Adding..."
+                : "Add Product"}
           </button>
         </div>
       )}

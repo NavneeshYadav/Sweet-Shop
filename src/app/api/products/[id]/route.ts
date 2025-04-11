@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import Product from "@/models/Product";
+import cloudinary from "@/lib/cloudinary";
 
 // UPDATE Product
 export async function PUT(req: Request, context: { params: { id: string } }) {
@@ -20,13 +21,30 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
 }
 
 // DELETE Product
-export async function DELETE(req: Request, context: { params: { id: string } }) {
-  await connectToDatabase();
+
+export async function DELETE(
+  req: Request,
+  context: { params: { id: string } }
+) {
   try {
-    const { id } =await context.params;
+    await connectToDatabase();
+    const { id } = await context.params;
+    const product = await Product.findById(id);
+    if (!product) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+    console.log(product.imagePublicId);
+    // Delete image from Cloudinary
+    if (product.imagePublicId) {
+
+
+      await cloudinary.uploader.destroy(product.imagePublicId);
+    }
+
     await Product.findByIdAndDelete(id);
+
     return NextResponse.json({ message: "Product deleted" }, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 400 });
+    return NextResponse.json({ error: (error as Error).message }, { status: 500 });
   }
 }

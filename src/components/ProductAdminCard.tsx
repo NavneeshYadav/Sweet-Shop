@@ -6,6 +6,7 @@ interface Product {
   name: string;
   price: number;
   image: string;
+  imagePublicId?: string;
   availableInStocks: boolean;
 }
 

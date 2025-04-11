@@ -11,15 +11,16 @@ export async function GET() {
 export async function POST(req: Request) {
   await connectToDatabase();
   try {
-    const { name, price, image, availableInStocks }: IProduct = await req.json();
+    const { name, price, image, imagePublicId, availableInStocks } = await req.json();
 
     const newProduct = new Product({
       name,
       price,
       image,
-      availableInStocks: availableInStocks ?? true, // fallback to true if undefined
+      imagePublicId,
+      availableInStocks,
     });
-     
+
 
     await newProduct.save();
     return NextResponse.json(newProduct, { status: 201 });
