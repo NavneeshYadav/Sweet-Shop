@@ -1,6 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import ProductAdminCard from "@/components/ProductAdminCard";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+
 
 interface Product {
   _id?: string;
@@ -49,67 +52,91 @@ const ProductAdminList: React.FC = () => {
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
+  
     const previewUrl = URL.createObjectURL(file);
     setImage ? setImage(previewUrl) : setNewProduct({ ...newProduct, image: previewUrl });
-
+  
     const formData = new FormData();
     formData.append("image", file);
-
+  
     try {
-      setImageUploading(true); // Start uploading
+      setImageUploading(true);
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
-
+  
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Image upload failed");
-
-      // Update newProduct with image URL and publicId
+  
+      // Update both newProduct and formik field
       setNewProduct((prev) => ({
         ...prev,
         image: data.imageUrl,
         imagePublicId: data.publicId,
       }));
+      formik.setFieldValue("image", data.imageUrl); // 👈 Set Formik image field
     } catch (error) {
       console.error("Image upload error:", error);
     } finally {
-      setImageUploading(false); // Done uploading
+      setImageUploading(false);
     }
   };
+  
 
-
+  // Formik Schema
+  const validationSchema = Yup.object({
+    name: Yup.string().min(2, "Too short").required("Product name is required"),
+    price: Yup.number().positive("Price must be positive").required("Price is required"),
+    image: Yup.string().required("Image is required"),
+  });
+  
 
 
   // **Handle Add Product**
-  const handleAddProduct = async () => {
-    if (!newProduct.name || newProduct.price <= 0 || !newProduct.image) return;
-    console.log(newProduct);
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      price: 0,
+      image: "",
+    },
+    validationSchema,
+    onSubmit: async (values, { resetForm }) => {
+      const newEntry = {
+        ...values,
+        imagePublicId: newProduct.imagePublicId,
+        availableInStocks: newProduct.availableInStocks,
+      };
+  
+      setLoading(true);
+      try {
+        const res = await fetch("/api/products", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newEntry),
+        });
+  
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to add product");
+  
+        setProducts([...products, data]);
+        resetForm();
+        setNewProduct({
+          name: "",
+          price: 0,
+          image: "",
+          imagePublicId: "",
+          availableInStocks: true,
+        });
+        setShowForm(false);
+      } catch (error) {
+        console.error("Add product error:", error);
+      }
+      setLoading(false);
+    },
+  });
+  
 
-    setLoading(true);
-    try {
-      const res = await fetch("/api/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newProduct),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to add product");
-
-      setProducts([...products, data]); // Update UI with new product
-      setNewProduct({
-        ...newProduct,
-        image: data.imageUrl,
-        imagePublicId: data.publicId,
-      });
-      setShowForm(false);
-    } catch (error) {
-      console.error("Add product error:", error);
-    }
-    setLoading(false);
-  };
 
   // **Handle Update Product**
   const handleUpdate = async (updatedProduct: Product) => {
@@ -146,51 +173,107 @@ const ProductAdminList: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 mt-6">
       <h2 className="text-2xl font-bold text-orange-600 mb-4">Manage Products</h2>
 
-      <button onClick={() => setShowForm(!showForm)} className="bg-green-500 text-white px-4 py-2 rounded-md mb-4">
+      <button
+        onClick={() => {
+          setShowForm((prev) => {
+            if (prev) {
+              formik.resetForm(); // reset Formik fields
+              setNewProduct({
+                name: "",
+                price: 0,
+                image: "",
+                imagePublicId: "",
+                availableInStocks: true,
+              }); // reset image & stock
+            }
+            return !prev;
+          });
+        }}
+        className="bg-green-500 text-white px-4 py-2 rounded-md mb-4"
+      >
         {showForm ? "Cancel" : "Add Product"}
       </button>
+
+
 
       {showForm && (
         <div className="bg-white shadow-md rounded-lg p-4 mb-6">
           <h3 className="text-lg font-semibold text-gray-700 mb-3">Add New Product</h3>
-          <input
-            type="text"
-            placeholder="Product Name"
-            value={newProduct.name}
-            onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-            className="border p-2 rounded-md w-full mb-2"
-          />
-          <input
-            type="number"
-            placeholder="Price"
-            value={newProduct.price}
-            onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
-            className="border p-2 rounded-md w-full mb-2"
-          />
-          <input type="file" accept="image/*" onChange={handleImageUpload} className="border p-2 rounded-md w-full mb-2" />
-          {newProduct.image && (
-            <img src={newProduct.image} alt="Preview" className="w-32 h-32 object-cover rounded-md mb-2" />
-          )}
-          <div className="flex items-center w-full mb-2">
+
+          <form
+            onSubmit={formik.handleSubmit}
+            className="space-y-2"
+          >
             <input
-              type="checkbox"
-              checked={newProduct.availableInStocks}
-              onChange={(e) =>
-                setNewProduct({ ...newProduct, availableInStocks: e.target.checked })
-              }
-              className="mr-2"
+              type="text"
+              name="name"
+              placeholder="Product Name"
+              className="border p-2 rounded-md w-full"
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              value={formik.values.name}
             />
-            <label className="text-gray-700">Available in Stock</label>
-          </div>
+            {formik.touched.name && formik.errors.name && <p className="text-red-500 text-sm">{formik.errors.name}</p>}
+
+            <input
+              type="number"
+              name="price"
+              placeholder="Price"
+              className="border p-2 rounded-md w-full"
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              value={formik.values.price}
+            />
+            {formik.touched.price && formik.errors.price && <p className="text-red-500 text-sm">{formik.errors.price}</p>}
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleImageUpload(e, (url) => {
+                setNewProduct((prev) => ({ ...prev, image: url }));
+              })}
+              className="border p-2 rounded-md w-full"
+            />
+            {formik.touched.image && formik.errors.image && (
+              <p className="text-red-500 text-sm">{formik.errors.image}</p>
+            )}
 
 
-          <button onClick={handleAddProduct} className="bg-blue-500 text-white px-4 py-2 rounded-md" disabled={loading || imageUploading}>
-            {imageUploading
-              ? "Uploading Image..."
-              : loading
-                ? "Adding..."
-                : "Add Product"}
-          </button>
+            {newProduct.image && (
+              <img
+                src={newProduct.image}
+                alt="Preview"
+                className="w-32 h-32 object-cover rounded-md mb-2"
+              />
+            )}
+
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                checked={newProduct.availableInStocks}
+                onChange={(e) =>
+                  setNewProduct((prev) => ({
+                    ...prev,
+                    availableInStocks: e.target.checked,
+                  }))
+                }
+                className="mr-2"
+              />
+              <label className="text-gray-700">Available in Stock</label>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || imageUploading}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md"
+            >
+              {imageUploading
+                ? "Uploading Image..."
+                : loading
+                  ? "Adding..."
+                  : "Add Product"}
+            </button>
+          </form>
         </div>
       )}
 
