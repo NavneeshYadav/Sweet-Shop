@@ -12,7 +12,9 @@ interface Product {
   image: string;
   imagePublicId?: string;
   availableInStocks: boolean;
+  category: string; // ✅ Added
 }
+
 
 
 
@@ -24,6 +26,7 @@ const ProductAdminList: React.FC = () => {
     image: "",
     imagePublicId: "",
     availableInStocks: true,
+    category: "sweet product", // ✅ Default
   });
 
   const [showForm, setShowForm] = useState(false);
@@ -52,23 +55,23 @@ const ProductAdminList: React.FC = () => {
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
-  
+
     const previewUrl = URL.createObjectURL(file);
     setImage ? setImage(previewUrl) : setNewProduct({ ...newProduct, image: previewUrl });
-  
+
     const formData = new FormData();
     formData.append("image", file);
-  
+
     try {
       setImageUploading(true);
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
-  
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Image upload failed");
-  
+
       // Update both newProduct and formik field
       setNewProduct((prev) => ({
         ...prev,
@@ -82,7 +85,7 @@ const ProductAdminList: React.FC = () => {
       setImageUploading(false);
     }
   };
-  
+
 
   // Formik Schema
   const validationSchema = Yup.object({
@@ -90,7 +93,7 @@ const ProductAdminList: React.FC = () => {
     price: Yup.number().positive("Price must be positive").required("Price is required"),
     image: Yup.string().required("Image is required"),
   });
-  
+
 
 
   // **Handle Add Product**
@@ -99,6 +102,7 @@ const ProductAdminList: React.FC = () => {
       name: "",
       price: 0,
       image: "",
+      category: "sweet product", // ✅ Default
     },
     validationSchema,
     onSubmit: async (values, { resetForm }) => {
@@ -107,7 +111,7 @@ const ProductAdminList: React.FC = () => {
         imagePublicId: newProduct.imagePublicId,
         availableInStocks: newProduct.availableInStocks,
       };
-  
+
       setLoading(true);
       try {
         const res = await fetch("/api/products", {
@@ -115,10 +119,10 @@ const ProductAdminList: React.FC = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newEntry),
         });
-  
+
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to add product");
-  
+
         setProducts([...products, data]);
         resetForm();
         setNewProduct({
@@ -127,7 +131,9 @@ const ProductAdminList: React.FC = () => {
           image: "",
           imagePublicId: "",
           availableInStocks: true,
+          category: "sweet product", // ✅ reset
         });
+
         setShowForm(false);
       } catch (error) {
         console.error("Add product error:", error);
@@ -135,7 +141,7 @@ const ProductAdminList: React.FC = () => {
       setLoading(false);
     },
   });
-  
+
 
 
   // **Handle Update Product**
@@ -184,7 +190,9 @@ const ProductAdminList: React.FC = () => {
                 image: "",
                 imagePublicId: "",
                 availableInStocks: true,
-              }); // reset image & stock
+                category: "sweet product", // ✅ reset
+              });
+              // reset image & stock
             }
             return !prev;
           });
@@ -261,6 +269,20 @@ const ProductAdminList: React.FC = () => {
               />
               <label className="text-gray-700">Available in Stock</label>
             </div>
+            <select
+              name="category"
+              value={formik.values.category}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className="border p-2 rounded-md w-full mb-2"
+            >
+              <option value="sweet product">Sweet Product</option>
+              <option value="namkeen product">Namkeen Product</option>
+              <option value="other">Other</option>
+            </select>
+            {formik.touched.category && formik.errors.category && (
+              <p className="text-red-500 text-sm">{formik.errors.category}</p>
+            )}
 
             <button
               type="submit"

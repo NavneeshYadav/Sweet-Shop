@@ -11,7 +11,7 @@ export async function GET() {
 export async function POST(req: Request) {
   await connectToDatabase();
   try {
-    const { name, price, image, imagePublicId, availableInStocks } = await req.json();
+    const { name, price, image, imagePublicId, availableInStocks,category } = await req.json();
 
     const newProduct = new Product({
       name,
@@ -19,6 +19,7 @@ export async function POST(req: Request) {
       image,
       imagePublicId,
       availableInStocks,
+      category, // ✅ Added category  
     });
 
 

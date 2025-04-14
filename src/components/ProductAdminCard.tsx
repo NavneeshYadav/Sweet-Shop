@@ -10,7 +10,9 @@ interface Product {
   image: string;
   imagePublicId?: string;
   availableInStocks: boolean;
+  category: string; // ✅ Added
 }
+
 
 interface ProductAdminProps {
   product: Product;
@@ -23,6 +25,7 @@ const validationSchema = Yup.object({
   name: Yup.string().required("Product name is required"),
   price: Yup.number().required("Price is required").min(0, "Price must be positive"),
   image: Yup.string().required("Image is required"),
+  category: Yup.string().required("Category is required"), // ✅
 });
 
 const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDelete, onImage }) => {
@@ -35,6 +38,7 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
       price: product.price,
       image: product.image,
       availableInStocks: product.availableInStocks,
+      category: product.category, // ✅ Added
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -111,6 +115,20 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
             />
             <span>Available in Stock</span>
           </label>
+          <select
+            name="category"
+            value={formik.values.category}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className="border p-2 rounded-md w-full mb-2"
+          >
+            <option value="sweet product">Sweet Product</option>
+            <option value="namkeen product">Namkeen Product</option>
+            <option value="other">Other</option>
+          </select>
+          {formik.touched.category && formik.errors.category && (
+            <p className="text-red-500 text-sm">{formik.errors.category}</p>
+          )}
 
           <button
             type="submit"

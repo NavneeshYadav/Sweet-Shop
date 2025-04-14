@@ -14,6 +14,7 @@ const ProductSchema: Schema = new Schema({
   image: { type: String, required: true },
   imagePublicId: { type: String }, // 👈 Add this
   availableInStocks: { type: Boolean, default: true },
+  category: { type: String, required: true },
 });
 
 
