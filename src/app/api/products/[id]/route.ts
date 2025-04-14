@@ -4,19 +4,47 @@ import Product from "@/models/Product";
 import cloudinary from "@/lib/cloudinary";
 
 // UPDATE Product
-export async function PUT(req: Request, context: { params: { id: string } }) {
+export async function PUT(req: Request,  context: { params: { id: string } }) {
   await connectToDatabase();
+
+  const { id } = await context.params;
+  const body = await req.json();
+
+  const {
+    name,
+    price,
+    image,
+    imagePublicId,
+    availableInStocks,
+    category,
+  } = body;
+
   try {
-    const { id } = await context.params;
-    const data = await req.json();
+    const existingProduct = await Product.findById(id);
 
-    const updatedProduct = await Product.findByIdAndUpdate(id, data, {
-      new: true,
-    });
+    if (!existingProduct) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
 
-    return NextResponse.json(updatedProduct, { status: 200 });
+    // 🧹 Delete old image from Cloudinary if changed
+    if (image !== existingProduct.image && existingProduct.imagePublicId) {
+      await cloudinary.uploader.destroy(existingProduct.imagePublicId);
+    }
+
+    // Update product
+    existingProduct.name = name;
+    existingProduct.price = price;
+    existingProduct.image = image;
+    existingProduct.imagePublicId = imagePublicId;
+    existingProduct.availableInStocks = availableInStocks;
+    existingProduct.category = category;
+
+    await existingProduct.save();
+
+    return NextResponse.json(existingProduct);
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 400 });
+    console.error("Error updating product:", error);
+    return NextResponse.json({ error: "Failed to update product" }, { status: 500 });
   }
 }
 

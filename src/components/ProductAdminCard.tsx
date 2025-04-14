@@ -37,8 +37,9 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
       name: product.name,
       price: product.price,
       image: product.image,
+      imagePublicId: product.imagePublicId || "", // ✅ Include this
       availableInStocks: product.availableInStocks,
-      category: product.category, // ✅ Added
+      category: product.category,
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -90,7 +91,10 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
             type="file"
             accept="image/*"
             onChange={(e) =>
-              onImage(e, (url) => formik.setFieldValue("image", url))
+              onImage(e, (url) => {
+                formik.setFieldValue("image", url);
+                formik.setFieldValue("imagePublicId", product.imagePublicId); // 👈 Add this
+              })
             }
             className="border p-2 w-full rounded-md mb-2"
           />

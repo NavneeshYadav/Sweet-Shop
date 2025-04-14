@@ -92,6 +92,7 @@ const ProductAdminList: React.FC = () => {
     name: Yup.string().min(2, "Too short").required("Product name is required"),
     price: Yup.number().positive("Price must be positive").required("Price is required"),
     image: Yup.string().required("Image is required"),
+    category: Yup.string().required("Category is required"), // ✅
   });
 
 
