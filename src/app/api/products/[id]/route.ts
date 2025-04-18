@@ -17,7 +17,7 @@ export async function GET(
   context: { params: { id: string } }
 ) {
   try {
-    const id = context.params.id;
+    const { id } = await context.params;
     await connectDB();
 
     const product = await Product.findById(id);
@@ -44,7 +44,7 @@ export async function PUT(
   context: { params: { id: string } }
 ) {
   try {
-    const id = context.params.id;
+    const { id } = await context.params;
     const body = await request.json();
 
     await connectDB();
@@ -91,7 +91,7 @@ export async function DELETE(
   context: { params: { id: string } }
 ) {
   try {
-    const id = context.params.id;
+    const { id } = await context.params;
     await connectDB();
 
     const product = await Product.findById(id);
