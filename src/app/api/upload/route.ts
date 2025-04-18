@@ -1,36 +1,58 @@
-import { NextRequest, NextResponse } from "next/server";
-import cloudinary from "@/lib/cloudinary";
+// File: /app/api/upload/route.ts
+import { v2 as cloudinary } from 'cloudinary';
+import { NextResponse } from 'next/server';
 
-export async function POST(req: NextRequest) {
+// Configure Cloudinary with your credentials 
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+export async function POST(request: Request) {
   try {
-    const formData = await req.formData();
-    const file = formData.get("image") as Blob | null;
-
+    // Parse form data from the request
+    const formData = await request.formData();
+    const file = formData.get('file') as File;
+    
     if (!file) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+      return NextResponse.json(
+        { error: 'No file provided' },
+        { status: 400 }
+      );
     }
 
-    // Convert Blob to Buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    // Convert file to buffer
+    const buffer = Buffer.from(await file.arrayBuffer());
+    
+    // Convert buffer to base64 for Cloudinary upload
+    const base64String = `data:${file.type};base64,${buffer.toString('base64')}`;
+    
     // Upload to Cloudinary
-    const uploadResult = await new Promise<{ secure_url: string; public_id: string }>((resolve, reject) => {
-      cloudinary.uploader.upload_stream({ folder: "product_images" }, (error, result) => {
-        if (error || !result) reject(error);
-        else {
-          console.log(result.public_id);
-          resolve({ secure_url: result.secure_url, public_id: result.public_id });
+    const result = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload(
+        base64String,
+        {
+          folder: 'products', // Optional: organize uploads in a folder
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
         }
-      }).end(buffer);
+      );
     });
 
-
+    // Return the Cloudinary URL and public_id to be stored in your database
     return NextResponse.json({
-      imageUrl: uploadResult.secure_url,
-      publicId: uploadResult.public_id,
-    }, { status: 200 });
-
+      url: (result as any).secure_url,
+      public_id: (result as any).public_id
+    });
+    
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+    console.error('Error uploading to Cloudinary:', error);
+    return NextResponse.json(
+      { error: 'Failed to upload image' },
+      { status: 500 }
+    );
   }
 }

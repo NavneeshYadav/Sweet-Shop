@@ -14,7 +14,7 @@ declare global {
 // Use globalThis to avoid TypeScript errors
 let cached = globalThis.mongooseCache || { conn: null, promise: null };
 
-export async function connectToDatabase() {
+export async function connectDB() {
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {

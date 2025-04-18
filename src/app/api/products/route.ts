@@ -1,31 +1,38 @@
+// File: /app/api/products/route.ts
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/db";
-import Product, { IProduct } from "@/models/Product";
+import { connectDB } from "@/lib/db"; // You'll need to create this
+import Product from "@/models/Product"; // You'll need to create this
 
+// GET - Fetch all products
 export async function GET() {
-  await connectToDatabase();
-  const products = await Product.find({});
-  return NextResponse.json(products, { status: 200 });
+  try {
+    await connectDB();
+    const products = await Product.find().sort({ createdAt: -1 });
+    return NextResponse.json(products);
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch products" },
+      { status: 500 }
+    );
+  }
 }
 
-export async function POST(req: Request) {
-  await connectToDatabase();
+// POST - Create a new product
+export async function POST(request: Request) {
   try {
-    const { name, price, image, imagePublicId, availableInStocks,category } = await req.json();
+    const body = await request.json();
+    await connectDB();
 
-    const newProduct = new Product({
-      name,
-      price,
-      image,
-      imagePublicId,
-      availableInStocks,
-      category, // ✅ Added category  
-    });
-
-
+    const newProduct = new Product(body);
     await newProduct.save();
+
     return NextResponse.json(newProduct, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 400 });
+    console.error("Error creating product:", error);
+    return NextResponse.json(
+      { error: "Failed to create product" },
+      { status: 500 }
+    );
   }
 }
