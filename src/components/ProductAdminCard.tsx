@@ -31,7 +31,7 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const formik = useFormik({
     initialValues: {
@@ -52,6 +52,7 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
         };
         await onUpdate(updatedProduct);
         setIsEditing(false);
+        setImagePreview(null); // Reset preview after successful update
       } finally {
         setLoading(false);
       }
@@ -59,12 +60,21 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
   });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setIsUploadingImage(true);
+    const file = e.target.files?.[0];
+    if (file) {
+      // Create URL for preview
+      const fileReader = new FileReader();
+      fileReader.onload = () => {
+        if (fileReader.readyState === 2) {
+          setImagePreview(fileReader.result as string);
+        }
+      };
+      fileReader.readAsDataURL(file);
+      
+      // Handle the actual upload via the provided onImage function
       onImage(e, (url: string, publicId: string) => {
         formik.setFieldValue("image", url);
         formik.setFieldValue("imagePublicId", publicId);
-        setIsUploadingImage(false);
       });
     }
   };
@@ -80,6 +90,22 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
         setDeleteLoading(false);
       }
     }
+  };
+
+  // Reset imagePreview when canceling the edit
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setImagePreview(null);
+    formik.resetForm({
+      values: {
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        imagePublicId: product.imagePublicId || "",
+        availableInStocks: product.availableInStocks,
+        category: product.category,
+      }
+    });
   };
 
   return (
@@ -122,13 +148,20 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
             <div className="text-red-500 text-sm mb-2">{formik.errors.image}</div>
           )}
 
-          {formik.values.image && (
+          {/* Show image preview if available, otherwise show the current image */}
+          {imagePreview ? (
             <img
-              src={formik.values.image}
+              src={imagePreview}
               alt="Preview"
               className="w-32 h-32 object-cover rounded-md mb-2"
             />
-          )}
+          ) : formik.values.image ? (
+            <img
+              src={formik.values.image}
+              alt="Current"
+              className="w-32 h-32 object-cover rounded-md mb-2"
+            />
+          ) : null}
 
           <label className="flex items-center gap-2 mb-2">
             <input
@@ -157,14 +190,9 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
           <button
             type="submit"
             className="bg-green-500 text-white px-4 py-2 rounded-md mr-2"
-            disabled={loading || isUploadingImage}
+            disabled={loading}
           >
-            {isUploadingImage ? (
-              <span className="flex items-center">
-                <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></span>
-                Uploading image...
-              </span>
-            ) : loading ? (
+            {loading ? (
               <span className="flex items-center">
                 <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></span>
                 Saving...
@@ -173,7 +201,7 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
           </button>
           <button
             type="button"
-            onClick={() => setIsEditing(false)}
+            onClick={handleCancelEdit}
             className="bg-gray-400 text-white px-4 py-2 rounded-md"
           >
             Cancel
