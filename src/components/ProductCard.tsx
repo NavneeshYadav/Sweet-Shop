@@ -2,7 +2,7 @@ import React from "react";
 
 interface ProductProps {
   product: {
-    id: number;
+    _id: string;
     name: string;
     price: number;
     image: string;

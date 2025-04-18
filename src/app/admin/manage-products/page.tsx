@@ -53,7 +53,7 @@ const ProductAdminList: React.FC = () => {
     initialValues: {
       name: "",
       price: 0,
-      image: null,
+      image: "",
       imageUrl: "",
       imagePublicId: "",
       category: "sweet product", // Default category

@@ -31,6 +31,7 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -58,10 +59,14 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
   });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onImage(e, (url: string, publicId: string) => {
-      formik.setFieldValue("image", url);
-      formik.setFieldValue("imagePublicId", publicId);
-    });
+    if (e.target.files && e.target.files.length > 0) {
+      setIsUploadingImage(true);
+      onImage(e, (url: string, publicId: string) => {
+        formik.setFieldValue("image", url);
+        formik.setFieldValue("imagePublicId", publicId);
+        setIsUploadingImage(false);
+      });
+    }
   };
 
   const handleDelete = async () => {
@@ -152,9 +157,14 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
           <button
             type="submit"
             className="bg-green-500 text-white px-4 py-2 rounded-md mr-2"
-            disabled={loading}
+            disabled={loading || isUploadingImage}
           >
-            {loading ? (
+            {isUploadingImage ? (
+              <span className="flex items-center">
+                <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></span>
+                Uploading image...
+              </span>
+            ) : loading ? (
               <span className="flex items-center">
                 <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></span>
                 Saving...

@@ -1,71 +1,56 @@
 "use client"
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ProductCard from "@/components/ProductCard";
 
-const products = [
-  { id: 1, name: "Chocolate Cake", price: 12.99, image: "/images/chocolate-cake.jpg" },
-  { id: 2, name: "Strawberry Cupcake", price: 5.49, image: "/images/strawberry-cupcake.jpg" },
-  { id: 3, name: "Vanilla Pastry", price: 4.99, image: "/images/vanilla-pastry.jpg" },
-  { id: 4, name: "Red Velvet Cake", price: 15.99, image: "/images/red-velvet-cake.jpg" },
-  { id: 5, name: "Blueberry Muffin", price: 3.99, image: "/images/blueberry-muffin.jpg" },
-  { id: 6, name: "Carrot Cake", price: 13.49, image: "/images/carrot-cake.jpg" },
-  { id: 7, name: "Lemon Tart", price: 6.99, image: "/images/lemon-tart.jpg" },
-  { id: 8, name: "Chocolate Chip Cookie", price: 2.49, image: "/images/chocolate-chip-cookie.jpg" },
-  { id: 9, name: "Macaron Assortment", price: 8.99, image: "/images/macaron-assortment.jpg" },
-  { id: 10, name: "Tiramisu", price: 9.99, image: "/images/tiramisu.jpg" },
-  { id: 11, name: "Brownie", price: 3.99, image: "/images/brownie.jpg" },
-  { id: 12, name: "Cheesecake", price: 14.99, image: "/images/cheesecake.jpg" },
-  { id: 13, name: "Apple Pie", price: 10.99, image: "/images/apple-pie.jpg" },
-  { id: 14, name: "Banana Bread", price: 7.49, image: "/images/banana-bread.jpg" },
-  { id: 15, name: "Coconut Macaroon", price: 4.99, image: "/images/coconut-macaroon.jpg" },
-  { id: 16, name: "Pineapple Upside-Down Cake", price: 11.99, image: "/images/pineapple-cake.jpg" },
-  { id: 17, name: "Raspberry Danish", price: 5.99, image: "/images/raspberry-danish.jpg" },
-  { id: 18, name: "Black Forest Cake", price: 16.49, image: "/images/black-forest-cake.jpg" },
-  { id: 19, name: "Pumpkin Pie", price: 9.49, image: "/images/pumpkin-pie.jpg" },
-  { id: 20, name: "Opera Cake", price: 17.99, image: "/images/opera-cake.jpg" },
-  { id: 21, name: "Chocolate Éclair", price: 6.49, image: "/images/chocolate-eclair.jpg" },
-  { id: 22, name: "Doughnut", price: 2.99, image: "/images/doughnut.jpg" },
-  { id: 23, name: "Pistachio Baklava", price: 12.99, image: "/images/pistachio-baklava.jpg" },
-  { id: 24, name: "Honey Cake", price: 13.99, image: "/images/honey-cake.jpg" },
-  { id: 25, name: "Matcha Cheesecake", price: 15.99, image: "/images/matcha-cheesecake.jpg" },
-  { id: 26, name: "Cherry Tart", price: 8.49, image: "/images/cherry-tart.jpg" },
-  { id: 27, name: "Mango Mousse", price: 9.49, image: "/images/mango-mousse.jpg" },
-  { id: 28, name: "Peanut Butter Brownie", price: 4.99, image: "/images/peanut-butter-brownie.jpg" },
-  { id: 29, name: "Lava Cake", price: 7.99, image: "/images/lava-cake.jpg" },
-  { id: 30, name: "S'mores Bar", price: 6.99, image: "/images/smores-bar.jpg" },
-  { id: 31, name: "Coffee Walnut Cake", price: 14.49, image: "/images/coffee-walnut-cake.jpg" },
-  { id: 32, name: "Vanilla Bean Cupcake", price: 4.49, image: "/images/vanilla-bean-cupcake.jpg" },
-  { id: 33, name: "Almond Biscotti", price: 3.49, image: "/images/almond-biscotti.jpg" },
-  { id: 34, name: "Hazelnut Praline", price: 10.49, image: "/images/hazelnut-praline.jpg" },
-  { id: 35, name: "Strawberry Shortcake", price: 12.99, image: "/images/strawberry-shortcake.jpg" },
-  { id: 36, name: "Mochi Ice Cream", price: 7.99, image: "/images/mochi-ice-cream.jpg" },
-  { id: 37, name: "Chocolate Swiss Roll", price: 8.99, image: "/images/chocolate-swiss-roll.jpg" },
-  { id: 38, name: "Churros", price: 5.99, image: "/images/churros.jpg" },
-  { id: 39, name: "Cinnamon Roll", price: 6.49, image: "/images/cinnamon-roll.jpg" },
-  { id: 40, name: "Blackberry Cobbler", price: 9.99, image: "/images/blackberry-cobbler.jpg" },
-  { id: 41, name: "Walnut Fudge", price: 5.49, image: "/images/walnut-fudge.jpg" },
-  { id: 42, name: "Peach Galette", price: 8.99, image: "/images/peach-galette.jpg" },
-  { id: 43, name: "Custard Tart", price: 6.99, image: "/images/custard-tart.jpg" },
-  { id: 44, name: "Raspberry Mousse Cake", price: 13.99, image: "/images/raspberry-mousse-cake.jpg" },
-  { id: 45, name: "Peanut Butter Cookie", price: 2.99, image: "/images/peanut-butter-cookie.jpg" },
-  { id: 46, name: "Mint Chocolate Cake", price: 15.49, image: "/images/mint-chocolate-cake.jpg" },
-  { id: 47, name: "Coconut Cream Pie", price: 10.99, image: "/images/coconut-cream-pie.jpg" },
-  { id: 48, name: "Lemon Meringue Pie", price: 11.49, image: "/images/lemon-meringue-pie.jpg" },
-  { id: 49, name: "Toffee Pudding", price: 7.99, image: "/images/toffee-pudding.jpg" },
-  { id: 50, name: "Salted Caramel Brownie", price: 5.99, image: "/images/salted-caramel-brownie.jpg" },
-];
+type Product = {
+  _id: string;
+  name: string;
+  price: number;
+  image: string;
+  category: string;
+  // add other fields if any (e.g., category, stock, etc.)
+};
+
 
 const ProductList: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [priceFilter, setPriceFilter] = useState<number | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage, setProductsPerPage] = useState(10);
 
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch('/api/products');
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        const data = await response.json();
+        setProducts(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Filter products based on search term and price filter
   const filteredProducts = products.filter(
     (product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (priceFilter !== null ? product.price <= priceFilter : true)
+      (priceFilter !== null ? product.price <= priceFilter : true) &&
+      (categoryFilter ? product.category === categoryFilter : true)
   );
+  
 
   // Calculate pagination indices
   const indexOfLastProduct = currentPage * productsPerPage;
@@ -109,19 +94,45 @@ const ProductList: React.FC = () => {
           <option value="15">15 per page</option>
           <option value="20">20 per page</option>
         </select>
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className="border p-2 rounded-md w-full sm:w-1/4"
+        >
+          <option value="">All Categories</option>
+          <option value="sweet">Sweet</option>
+          <option value="namkeen">Namkeen</option>
+          <option value="other">Other</option>
+        </select>
       </div>
 
-      {/* Product Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {currentProducts.length > 0 ? (
-          currentProducts.map((product) => <ProductCard key={product.id} product={product} />)
-        ) : (
-          <p className="text-gray-500">No products found.</p>
-        )}
-      </div>
+      {/* Loading, Error and Product Grid */}
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-600"></div>
+        </div>
+      ) : error ? (
+        <div className="text-center text-red-500 py-8">
+          <p>{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700"
+          >
+            Try Again
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {currentProducts.length > 0 ? (
+            currentProducts.map((product) => <ProductCard key={product._id} product={product} />)
+          ) : (
+            <p className="text-gray-500 col-span-3 text-center py-8">No products found.</p>
+          )}
+        </div>
+      )}
 
       {/* Pagination Controls */}
-      {totalPages > 1 && (
+      {!loading && !error && totalPages > 1 && (
         <div className="flex flex-wrap justify-center mt-6 gap-2">
           {/* Previous Button */}
           <button
