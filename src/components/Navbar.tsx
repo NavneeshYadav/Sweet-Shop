@@ -4,11 +4,15 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, ShoppingCart, X } from 'lucide-react';
+import { useAppSelector } from '../store/hooks';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const pathname = usePathname(); // Get current path
-  const cartItemCount = 3; // Replace with actual count from state or Redux
+  const pathname = usePathname();
+  const cartItems = useAppSelector(state => state.cart.items);
+  
+  // Calculate total items in cart
+  const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 

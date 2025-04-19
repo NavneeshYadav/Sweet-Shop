@@ -100,8 +100,8 @@ const ProductList: React.FC = () => {
           className="border p-2 rounded-md w-full sm:w-1/4"
         >
           <option value="">All Categories</option>
-          <option value="sweet">Sweet</option>
-          <option value="namkeen">Namkeen</option>
+          <option value="sweet product">Sweet</option>
+          <option value="namkeen product">Namkeen</option>
           <option value="other">Other</option>
         </select>
       </div>
