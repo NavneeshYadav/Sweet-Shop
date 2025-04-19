@@ -8,7 +8,7 @@ type Product = {
   price: number;
   image: string;
   category: string;
-  // add other fields if any (e.g., category, stock, etc.)
+  availableInStocks: boolean;
 };
 
 
