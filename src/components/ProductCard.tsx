@@ -31,11 +31,7 @@ const ProductCard: React.FC<ProductProps> = ({ product }) => {
 
   return (
     <div className="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition relative">
-      <img
-        src={product.image}
-        alt={product.name}
-        className="w-full h-40 object-cover rounded-md"
-      />
+     <img src={product.image} alt={product.name} className="aspect-square w-full object-cover rounded-md" />
       {!product.availableInStocks && (
         <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
           Out of Stock
