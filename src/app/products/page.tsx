@@ -1,5 +1,5 @@
-"use client"
-import React, { useState, useEffect } from "react";
+"use client";
+import React, { useState, useEffect, useMemo } from "react";
 import ProductCard from "@/components/ProductCard";
 
 type Product = {
@@ -10,7 +10,6 @@ type Product = {
   category: string;
   availableInStocks: boolean;
 };
-
 
 const ProductList: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -27,14 +26,12 @@ const ProductList: React.FC = () => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const response = await fetch('/api/products');
-        if (!response.ok) {
-          throw new Error('Failed to fetch products');
-        }
+        const response = await fetch("/api/products");
+        if (!response.ok) throw new Error("Failed to fetch products");
         const data = await response.json();
         setProducts(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
         setLoading(false);
       }
@@ -43,27 +40,39 @@ const ProductList: React.FC = () => {
     fetchProducts();
   }, []);
 
-  // Filter products based on search term and price filter
-  const filteredProducts = products.filter(
-    (product) =>
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, priceFilter, categoryFilter]);
+
+  // Filtered products with useMemo for performance
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (priceFilter !== null ? product.price <= priceFilter : true) &&
-      (categoryFilter ? product.category === categoryFilter : true)
-  );
-  
+      (categoryFilter ? product.category.toLowerCase() === categoryFilter.toLowerCase() : true)
+    );
+  }, [products, searchTerm, priceFilter, categoryFilter]);
 
-  // Calculate pagination indices
+  // Pagination logic
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
+  // Clear filters handler
+  const clearFilters = () => {
+    setSearchTerm("");
+    setPriceFilter(null);
+    setCategoryFilter("");
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 mb-6">
       <h2 className="text-2xl font-bold text-orange-600 mb-4">Our Products</h2>
 
-      {/* Search, Filter, and Items Per Page Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+      {/* Search, Filter, Items Per Page */}
+      <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-6">
         <input
           type="text"
           placeholder="Search for products..."
@@ -77,22 +86,10 @@ const ProductList: React.FC = () => {
           className="border p-2 rounded-md w-full sm:w-1/4"
         >
           <option value="">Filter by price</option>
-          <option value="5">Under $5</option>
-          <option value="10">Under $10</option>
-          <option value="15">Under $15</option>
-        </select>
-        <select
-          value={productsPerPage}
-          onChange={(e) => {
-            setProductsPerPage(Number(e.target.value));
-            setCurrentPage(1); // Reset to first page
-          }}
-          className="border p-2 rounded-md w-full sm:w-1/4"
-        >
-          <option value="5">5 per page</option>
-          <option value="10">10 per page</option>
-          <option value="15">15 per page</option>
-          <option value="20">20 per page</option>
+          <option value="50">Under ₹50</option>
+          <option value="100">Under ₹100</option>
+          <option value="200">Under ₹200</option>
+          <option value="300">Under ₹300</option>
         </select>
         <select
           value={categoryFilter}
@@ -104,9 +101,28 @@ const ProductList: React.FC = () => {
           <option value="namkeen product">Namkeen</option>
           <option value="other">Other</option>
         </select>
+        <select
+          value={productsPerPage}
+          onChange={(e) => {
+            setProductsPerPage(Number(e.target.value));
+            setCurrentPage(1);
+          }}
+          className="border p-2 rounded-md w-full sm:w-1/4"
+        >
+          <option value="5">5 per page</option>
+          <option value="10">10 per page</option>
+          <option value="15">15 per page</option>
+          <option value="20">20 per page</option>
+        </select>
+        <button
+          onClick={clearFilters}
+          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+        >
+          Clear Filters
+        </button>
       </div>
 
-      {/* Loading, Error and Product Grid */}
+      {/* Loading, Error, Product Grid */}
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-600"></div>
@@ -124,17 +140,19 @@ const ProductList: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {currentProducts.length > 0 ? (
-            currentProducts.map((product) => <ProductCard key={product._id} product={product} />)
+            currentProducts.map((product) => (
+              <ProductCard key={product._id} product={product} />
+            ))
           ) : (
             <p className="text-gray-500 col-span-3 text-center py-8">No products found.</p>
           )}
         </div>
       )}
 
-      {/* Pagination Controls */}
+      {/* Pagination */}
       {!loading && !error && totalPages > 1 && (
         <div className="flex flex-wrap justify-center mt-6 gap-2">
-          {/* Previous Button */}
+          {/* Prev */}
           <button
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
@@ -145,7 +163,6 @@ const ProductList: React.FC = () => {
 
           {/* Page Numbers */}
           <div className="flex space-x-1">
-            {/* Always Show First Page */}
             {currentPage > 2 && (
               <>
                 <button
@@ -158,7 +175,6 @@ const ProductList: React.FC = () => {
               </>
             )}
 
-            {/* Show Previous, Current & Next Pages */}
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .filter((page) => page >= currentPage - 1 && page <= currentPage + 1)
               .map((page) => (
@@ -171,7 +187,6 @@ const ProductList: React.FC = () => {
                 </button>
               ))}
 
-            {/* Always Show Last Page */}
             {currentPage < totalPages - 1 && (
               <>
                 {currentPage < totalPages - 2 && <span className="px-2 py-2">...</span>}
@@ -185,7 +200,7 @@ const ProductList: React.FC = () => {
             )}
           </div>
 
-          {/* Next Button */}
+          {/* Next */}
           <button
             onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
