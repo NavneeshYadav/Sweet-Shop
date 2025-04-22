@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 
 import { Trash2 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
@@ -6,6 +7,10 @@ import { removeFromCart, updateQuantity } from '../../store/cartSlice';
 import Link from 'next/link';
 
 const ShopCart = () => {
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [customerAddress, setCustomerAddress] = useState('');
+
   const dispatch = useAppDispatch();
   const cartItems = useAppSelector(state => state.cart.items);
 
@@ -22,6 +27,38 @@ const ShopCart = () => {
     0
   );
 
+  const generateWhatsAppLink = (
+    cartItems: any[],
+    totalPrice: number,
+    name: string,
+    phone: string,
+    address: string
+  ) => {
+    const shipping = totalPrice > 0 ? 50 : 0;
+    const grandTotal = totalPrice + shipping;
+  
+    let message = `*Order Summary*\n\n`;
+    cartItems.forEach((item, index) => {
+      message += `${index + 1}. ${item.name} - ₹${item.price} x ${item.quantity} = ₹${(
+        item.price * item.quantity
+      ).toFixed(2)}\n`;
+    });
+  
+    message += `\nSubtotal: ₹${totalPrice.toFixed(2)}`;
+    message += `\nShipping: ₹${shipping.toFixed(2)}`;
+    message += `\n*Total: ₹${grandTotal.toFixed(2)}*\n\n`;
+  
+    message += `*Customer Details:*\n`;
+    message += `Name: ${name}\n`;
+    message += `Phone: ${phone}\n`;
+    message += `Address: ${address}\n`;
+  
+    const encodedMessage = encodeURIComponent(message);
+    const phoneNumber = "919926414328"; // Replace with your business number
+    return `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+  };
+  
+
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-white shadow-lg rounded-lg mt-10">
       <h2 className="text-2xl font-bold text-orange-400 mb-4 text-center">
@@ -31,7 +68,7 @@ const ShopCart = () => {
       {cartItems.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-gray-500 mb-4">Your cart is empty.</p>
-          <Link href="/products" 
+          <Link href="/products"
             className="bg-orange-400 text-white px-6 py-2 rounded-md hover:bg-orange-300 transition">
             Continue Shopping
           </Link>
@@ -107,16 +144,45 @@ const ShopCart = () => {
               <span>₹{totalPrice > 0 ? (totalPrice + 50).toFixed(2) : '0.00'}</span>
             </div>
           </div>
+          {/* User Info Form */}
+          <div className="mt-6 space-y-4 w-full">
+            <input
+              type="text"
+              placeholder="Your Name"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-300"
+            />
+            <input
+              type="tel"
+              placeholder="Phone Number"
+              value={customerPhone}
+              onChange={(e) => setCustomerPhone(e.target.value)}
+              className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-300"
+            />
+            <textarea
+              placeholder="Delivery Address"
+              value={customerAddress}
+              onChange={(e) => setCustomerAddress(e.target.value)}
+              className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-300"
+            ></textarea>
+          </div>
 
           {/* Checkout Button */}
           <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
             <Link href="/products" className="text-orange-400 hover:text-orange-300 transition">
               Continue Shopping
             </Link>
-            <button className="bg-orange-400 text-white px-6 py-2 rounded-md hover:bg-orange-300 transition w-full sm:w-auto">
+            <a
+              href={generateWhatsAppLink(cartItems, totalPrice, customerName, customerPhone, customerAddress)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-orange-400 text-white px-6 py-2 rounded-md hover:bg-orange-300 transition w-full sm:w-auto text-center"
+            >
               Proceed to Checkout
-            </button>
+            </a>
           </div>
+
         </>
       )}
     </div>
