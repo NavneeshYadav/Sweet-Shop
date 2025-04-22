@@ -18,10 +18,10 @@ const ProductList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [priceFilter, setPriceFilter] = useState<number | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [availabilityFilter, setAvailabilityFilter] = useState<string>(""); // ✅ NEW
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage, setProductsPerPage] = useState(10);
 
-  // Fetch products from API
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
@@ -40,38 +40,37 @@ const ProductList: React.FC = () => {
     fetchProducts();
   }, []);
 
-  // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, priceFilter, categoryFilter]);
+  }, [searchTerm, priceFilter, categoryFilter, availabilityFilter]); // ✅ NEW
 
-  // Filtered products with useMemo for performance
   const filteredProducts = useMemo(() => {
     return products.filter((product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (priceFilter !== null ? product.price <= priceFilter : true) &&
-      (categoryFilter ? product.category.toLowerCase() === categoryFilter.toLowerCase() : true)
+      (categoryFilter ? product.category.toLowerCase() === categoryFilter.toLowerCase() : true) &&
+      (availabilityFilter === "inStock" ? product.availableInStocks :
+       availabilityFilter === "outOfStock" ? !product.availableInStocks : true) // ✅ NEW
     );
-  }, [products, searchTerm, priceFilter, categoryFilter]);
+  }, [products, searchTerm, priceFilter, categoryFilter, availabilityFilter]); // ✅ NEW
 
-  // Pagination logic
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
-  // Clear filters handler
   const clearFilters = () => {
     setSearchTerm("");
     setPriceFilter(null);
     setCategoryFilter("");
+    setAvailabilityFilter(""); // ✅ NEW
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 mb-6">
       <h2 className="text-2xl font-bold text-orange-600 mb-4">Our Products</h2>
 
-      {/* Search, Filter, Items Per Page */}
+      {/* Filters */}
       <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-6">
         <input
           type="text"
@@ -100,6 +99,15 @@ const ProductList: React.FC = () => {
           <option value="sweet product">Sweet</option>
           <option value="namkeen product">Namkeen</option>
           <option value="other">Other</option>
+        </select>
+        <select
+          value={availabilityFilter} // ✅ NEW
+          onChange={(e) => setAvailabilityFilter(e.target.value)} // ✅ NEW
+          className="border p-2 rounded-md w-full sm:w-1/4"
+        >
+          <option value="">All Stock</option>
+          <option value="inStock">In Stock</option>
+          <option value="outOfStock">Out of Stock</option>
         </select>
         <select
           value={productsPerPage}
