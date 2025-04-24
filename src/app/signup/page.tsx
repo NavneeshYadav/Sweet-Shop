@@ -17,6 +17,8 @@ const SignupForm = () => {
             email: '',
             password: '',
             adminCode: '',
+            address: '',
+            pincode: '',
         },
         validationSchema: Yup.object({
             fullName: Yup.string()
@@ -36,6 +38,12 @@ const SignupForm = () => {
                 'Invalid admin code',
                 (value) => !value || value === 'NAVNEESH'
             ),
+            address: Yup.string()
+                .min(5, 'Address must be at least 5 characters')
+                .required('Address is required'),
+            pincode: Yup.string()
+                .matches(/^\d{6}$/, 'Pincode must be 6 digits')
+                .required('Pincode is required'),
         }),
         onSubmit: (values, { resetForm }) => {
             const isAdmin = values.adminCode === 'NAVNEESH';
@@ -45,13 +53,15 @@ const SignupForm = () => {
                 email: values.email,
                 password: values.password,
                 admin: isAdmin,
+                address: values.address,
+                pincode: values.pincode,
             };
 
             console.log('Signup data:', userData);
             resetForm();
-            // handle API call here
         },
     });
+
 
     return (
         <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
@@ -64,8 +74,8 @@ const SignupForm = () => {
                         type="text"
                         {...formik.getFieldProps('fullName')}
                         className={`w-full px-3 py-2 border ${formik.touched.fullName && formik.errors.fullName
-                                ? 'border-red-500'
-                                : 'border-gray-300'
+                            ? 'border-red-500'
+                            : 'border-gray-300'
                             } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400`}
                         placeholder="Your full name"
                     />
@@ -81,8 +91,8 @@ const SignupForm = () => {
                         type="text"
                         {...formik.getFieldProps('phone')}
                         className={`w-full px-3 py-2 border ${formik.touched.phone && formik.errors.phone
-                                ? 'border-red-500'
-                                : 'border-gray-300'
+                            ? 'border-red-500'
+                            : 'border-gray-300'
                             } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400`}
                         placeholder="Enter your phone number"
                     />
@@ -98,8 +108,8 @@ const SignupForm = () => {
                         type="email"
                         {...formik.getFieldProps('email')}
                         className={`w-full px-3 py-2 border ${formik.touched.email && formik.errors.email
-                                ? 'border-red-500'
-                                : 'border-gray-300'
+                            ? 'border-red-500'
+                            : 'border-gray-300'
                             } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400`}
                         placeholder="you@example.com"
                     />
@@ -115,8 +125,8 @@ const SignupForm = () => {
                         type={showPassword ? 'text' : 'password'}
                         {...formik.getFieldProps('password')}
                         className={`w-full px-3 py-2 border ${formik.touched.password && formik.errors.password
-                                ? 'border-red-500'
-                                : 'border-gray-300'
+                            ? 'border-red-500'
+                            : 'border-gray-300'
                             } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400`}
                         placeholder="••••••••"
                     />
@@ -132,6 +142,40 @@ const SignupForm = () => {
                     )}
                 </div>
 
+                {/* Address */}
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                    <textarea
+                        rows={3}
+                        {...formik.getFieldProps('address')}
+                        className={`w-full px-3 py-2 border ${formik.touched.address && formik.errors.address
+                            ? 'border-red-500'
+                            : 'border-gray-300'
+                            } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none`}
+                        placeholder="Enter your full address"
+                    ></textarea>
+                    {formik.touched.address && formik.errors.address && (
+                        <p className="text-red-500 text-sm mt-1">{formik.errors.address}</p>
+                    )}
+                </div>
+
+                {/* Pincode */}
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Pincode</label>
+                    <input
+                        type="text"
+                        {...formik.getFieldProps('pincode')}
+                        className={`w-full px-3 py-2 border ${formik.touched.pincode && formik.errors.pincode
+                            ? 'border-red-500'
+                            : 'border-gray-300'
+                            } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400`}
+                        placeholder="Enter your area pincode"
+                    />
+                    {formik.touched.pincode && formik.errors.pincode && (
+                        <p className="text-red-500 text-sm mt-1">{formik.errors.pincode}</p>
+                    )}
+                </div>
+
                 {/* Admin Code */}
                 <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Admin Code (Optional)</label>
@@ -139,8 +183,8 @@ const SignupForm = () => {
                         type="text"
                         {...formik.getFieldProps('adminCode')}
                         className={`w-full px-3 py-2 border ${formik.touched.adminCode && formik.errors.adminCode
-                                ? 'border-red-500'
-                                : 'border-gray-300'
+                            ? 'border-red-500'
+                            : 'border-gray-300'
                             } rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400`}
                         placeholder="Enter Admin Code if any"
                     />
