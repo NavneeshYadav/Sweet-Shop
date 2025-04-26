@@ -1,15 +1,17 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Trash2 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { removeFromCart, updateQuantity } from '../../store/cartSlice';
 import Link from 'next/link';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { useUser } from '@clerk/clerk-react'; // Import Clerk hook for user data
 
 const ShopCart = () => {
   const dispatch = useAppDispatch();
   const cartItems = useAppSelector(state => state.cart.items);
+  const { user, isLoaded } = useUser(); // Clerk user hook
 
   const totalPrice = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
@@ -51,9 +53,9 @@ const ShopCart = () => {
 
   const formik = useFormik({
     initialValues: {
-      customerName: '',
+      customerName: user?.fullName || '',
       customerPhone: '',
-      customerEmail: '',
+      customerEmail: user?.emailAddresses[0]?.emailAddress || '',
       customerAddress: '',
     },
     validationSchema: Yup.object({
@@ -169,11 +171,12 @@ const ShopCart = () => {
             <input
               type="text"
               name="customerName"
-              placeholder="Your Name"
+              placeholder="Your Full Name"
               value={formik.values.customerName}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-300"
+              disabled
+              className="w-full border px-4 py-2 rounded-md bg-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-300"
             />
             {formik.touched.customerName && formik.errors.customerName && (
               <div className="text-red-500 text-sm">{formik.errors.customerName}</div>
@@ -197,7 +200,8 @@ const ShopCart = () => {
               value={formik.values.customerEmail}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-300"
+              disabled
+              className="w-full border px-4 py-2 rounded-md bg-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-300"
             />
             {formik.touched.customerEmail && formik.errors.customerEmail && (
               <div className="text-red-500 text-sm">{formik.errors.customerEmail}</div>
