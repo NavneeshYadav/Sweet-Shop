@@ -11,16 +11,23 @@ interface Product {
 interface Order {
     id: string;
     customerName: string;
+    email: string;
+    phone: string;
+    address: string;
     products: Product[];
     totalPrice: number;
     status: 'Pending' | 'Delivered' | 'Cancelled';
     date: string;
 }
 
+
 const mockOrders: Order[] = [
     {
         id: 'ORD001',
         customerName: 'Ravi Kumar',
+        email: 'ravi.kumar@example.com',
+        phone: '9876543210',
+        address: '123 Street, Delhi',
         products: [
             { name: 'Chocolate Cake', quantity: 1, price: 400 },
             { name: 'Kaju Katli', quantity: 1, price: 600 },
@@ -32,6 +39,9 @@ const mockOrders: Order[] = [
     {
         id: 'ORD002',
         customerName: 'Priya Sharma',
+        email: 'priya.sharma@example.com',
+        phone: '9123456780',
+        address: '456 Avenue, Mumbai',
         products: [
             { name: 'Rasgulla Box', quantity: 2, price: 300 },
         ],
@@ -40,6 +50,7 @@ const mockOrders: Order[] = [
         date: '2025-04-18',
     },
 ];
+
 
 const OrderInsightPage = () => {
     const [orders, setOrders] = useState<Order[]>(mockOrders);
@@ -62,24 +73,31 @@ const OrderInsightPage = () => {
                         <tr>
                             <th className="px-6 py-3">Order ID</th>
                             <th className="px-6 py-3">Customer</th>
+                            <th className="px-6 py-3">Email</th>
+                            <th className="px-6 py-3">Phone No</th>
+                            <th className="px-6 py-3">Address</th>
                             <th className="px-6 py-3">Total (₹)</th>
                             <th className="px-6 py-3">Status</th>
                             <th className="px-6 py-3">Date</th>
                             <th className="px-6 py-3">Order Items</th>
                         </tr>
                     </thead>
+
                     <tbody className="divide-y divide-gray-200">
                         {orders.map(order => (
                             <tr key={order.id} className="hover:bg-orange-50 transition">
                                 <td className="px-6 py-4">{order.id}</td>
                                 <td className="px-6 py-4">{order.customerName}</td>
+                                <td className="px-6 py-4">{order.email}</td>
+                                <td className="px-6 py-4">{order.phone}</td>
+                                <td className="px-6 py-4">{order.address}</td>
                                 <td className="px-6 py-4">₹{order.totalPrice}</td>
                                 <td className="px-6 py-4">
                                     <select
                                         value={order.status}
                                         onChange={(e) => handleStatusChange(order.id, e.target.value as Order['status'])}
                                         className={`px-3 py-1 rounded-md text-sm font-medium bg-white border focus:outline-none focus:ring-2
-      ${order.status === 'Delivered' ? 'text-green-600 border-green-300 focus:ring-green-200'
+                        ${order.status === 'Delivered' ? 'text-green-600 border-green-300 focus:ring-green-200'
                                                 : order.status === 'Pending' ? 'text-yellow-600 border-yellow-300 focus:ring-yellow-200'
                                                     : 'text-red-600 border-red-300 focus:ring-red-200'}`}
                                     >
@@ -88,7 +106,6 @@ const OrderInsightPage = () => {
                                         <option value="Cancelled">Cancelled</option>
                                     </select>
                                 </td>
-
                                 <td className="px-6 py-4">{order.date}</td>
                                 <td className="px-6 py-4">
                                     <button
@@ -101,6 +118,7 @@ const OrderInsightPage = () => {
                             </tr>
                         ))}
                     </tbody>
+
                 </table>
             </div>
 
