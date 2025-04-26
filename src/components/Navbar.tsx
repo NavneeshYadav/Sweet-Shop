@@ -5,13 +5,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, ShoppingCart, X } from 'lucide-react';
 import { useAppSelector } from '../store/hooks';
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'; // ✨ Import Clerk components
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const cartItems = useAppSelector(state => state.cart.items);
-  
-  // Calculate total items in cart
+
   const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -21,11 +21,6 @@ const Navbar = () => {
     { navId: 2, name: 'Products', href: '/products' },
     { navId: 3, name: 'About', href: '/about' },
     { navId: 4, name: 'Admin', href: '/admin' },
-  ];
-
-  const authLinks = [
-    { navId: 6, name: 'Login', href: '/login', style: 'text-orange-400 hover:text-orange-300 transition' },
-    { navId: 7, name: 'Signup', href: '/signup', style: 'bg-orange-400 text-white px-4 py-1.5 rounded-md hover:bg-orange-300 transition' },
   ];
 
   return (
@@ -48,7 +43,7 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Right side - Auth Links */}
+          {/* Right side - Cart Icon and Auth */}
           <div className="hidden md:flex space-x-4 items-center">
             <div className="relative">
               <Link href="/cart" className="text-orange-400 hover:text-orange-300 transition relative">
@@ -60,14 +55,36 @@ const Navbar = () => {
                 )}
               </Link>
             </div>
-            {authLinks.map((link) => (
-              <Link key={link.navId} href={link.href} className={link.style}>
-                {link.name}
-              </Link>
-            ))}
+
+            {/* Clerk Authentication */}
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="text-orange-400 hover:text-orange-300 transition">Login</button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="bg-orange-400 text-white px-4 py-1.5 rounded-md hover:bg-orange-300 transition">
+                  Signup
+                </button>
+              </SignUpButton>
+            </SignedOut>
+
+            <SignedIn>
+              <div className="flex flex-col space-y-2">
+                <Link
+                  href="/orders"
+                  className="text-orange-400 hover:text-orange-300 py-2 text-center"
+                >
+                  My Orders
+                </Link>
+                <div className="flex justify-center">
+                  <UserButton afterSignOutUrl="/" />
+                </div>
+              </div>
+            </SignedIn>
+
           </div>
 
-          {/* Mobile Menu Button with Cart Icon */}
+          {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-4">
             <Link href="/cart" className="text-orange-400 hover:text-orange-300 relative">
               <ShoppingCart />
@@ -101,15 +118,26 @@ const Navbar = () => {
             </Link>
           ))}
           <hr className="border-gray-200" />
-          {authLinks.map((link) => (
-            <Link
-              key={link.navId}
-              href={link.href}
-              className={`block py-2 ${link.name === 'Signup' ? 'bg-orange-400 text-white rounded-md text-center hover:bg-orange-300' : 'text-orange-400 hover:text-orange-300'}`}
-            >
-              {link.name}
-            </Link>
-          ))}
+
+          {/* Mobile Clerk Auth */}
+          <SignedOut>
+            <div className="flex flex-col space-y-2">
+              <SignInButton mode="modal">
+                <button className="text-orange-400 hover:text-orange-300">Login</button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="bg-orange-400 text-white rounded-md py-2 hover:bg-orange-300">
+                  Signup
+                </button>
+              </SignUpButton>
+            </div>
+          </SignedOut>
+
+          <SignedIn>
+            <div className="flex justify-center">
+              <UserButton afterSignOutUrl="/" />
+            </div>
+          </SignedIn>
         </div>
       )}
     </nav>
