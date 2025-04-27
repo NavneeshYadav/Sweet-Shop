@@ -65,9 +65,40 @@ Address: ${values.customerAddress}
         .required('Email is required'),
       customerAddress: Yup.string().required('Address is required'),
     }),
-    onSubmit: (values) => {
-      const link = generateWhatsAppLink(values);
-      window.open(link, '_blank');
+    onSubmit: async(values) => {
+      const orderData = {
+        customerName: values.customerName,
+        customerPhone: values.customerPhone,
+        customerEmail: values.customerEmail,
+        customerAddress: values.customerAddress,
+        cartItems: cartItems,
+        totalPrice: totalPrice,
+        shippingCost: shippingCost,
+        grandTotal: grandTotal,
+      };
+    
+      try {
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(orderData),
+        });
+    
+        if (!res.ok) {
+          throw new Error('Failed to place order');
+        }
+    
+        const data = await res.json();
+        console.log('Order Saved:', data);
+    
+        const link = generateWhatsAppLink(values);
+        window.open(link, '_blank');
+      } catch (error) {
+        console.error('Checkout Error:', error);
+        alert('Something went wrong. Please try again.');
+      }
     },
   });
 
