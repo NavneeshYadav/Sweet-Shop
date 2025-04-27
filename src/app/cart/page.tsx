@@ -2,7 +2,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Trash2 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { removeFromCart, updateQuantity } from '../../store/cartSlice';
+import { clearCart, removeFromCart, updateQuantity } from '../../store/cartSlice';
 import Link from 'next/link';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -65,7 +65,7 @@ Address: ${values.customerAddress}
         .required('Email is required'),
       customerAddress: Yup.string().required('Address is required'),
     }),
-    onSubmit: async(values) => {
+    onSubmit: async (values) => {
       const orderData = {
         customerName: values.customerName,
         customerPhone: values.customerPhone,
@@ -76,7 +76,7 @@ Address: ${values.customerAddress}
         shippingCost: shippingCost,
         grandTotal: grandTotal,
       };
-    
+
       try {
         const res = await fetch('/api/orders', {
           method: 'POST',
@@ -85,14 +85,14 @@ Address: ${values.customerAddress}
           },
           body: JSON.stringify(orderData),
         });
-    
+
         if (!res.ok) {
           throw new Error('Failed to place order');
         }
-    
+
         const data = await res.json();
         console.log('Order Saved:', data);
-    
+        dispatch(clearCart());
         const link = generateWhatsAppLink(values);
         window.open(link, '_blank');
       } catch (error) {
