@@ -1,53 +1,50 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Trash2 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { removeFromCart, updateQuantity } from '../../store/cartSlice';
 import Link from 'next/link';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { useUser } from '@clerk/clerk-react'; // Import Clerk hook for user data
+import { useUser } from '@clerk/clerk-react';
+
+export interface CartItem {
+  _id: string;
+  name: string;
+  price: number;
+  image: string;
+  quantity: number;
+}
 
 const ShopCart = () => {
   const dispatch = useAppDispatch();
-  const cartItems = useAppSelector(state => state.cart.items);
-  const { user, isLoaded } = useUser(); // Clerk user hook
+  const cartItems = useAppSelector((state) => state.cart.items);
+  const { user } = useUser();
 
-  const totalPrice = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
+  const totalPrice = useMemo(
+    () => cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0),
+    [cartItems]
   );
 
-  const generateWhatsAppLink = (
-    cartItems: any[],
-    totalPrice: number,
-    name: string,
-    phone: string,
-    address: string,
-    email: string
-  ) => {
-    const shipping = totalPrice > 0 ? 50 : 0;
-    const grandTotal = totalPrice + shipping;
+  const shippingCost = totalPrice > 0 ? 50 : 0;
+  const grandTotal = totalPrice + shippingCost;
 
-    let message = `*Order Summary*\n\n`;
-    cartItems.forEach((item, index) => {
-      message += `${index + 1}. ${item.name} - ₹${item.price} x ${item.quantity} = ₹${(
-        item.price * item.quantity
-      ).toFixed(2)}\n`;
-    });
+  const generateWhatsAppLink = (values: typeof formik.values) => {
+    const message = `
+*Order Summary*\n
+${cartItems.map((item, i) => `${i + 1}. ${item.name} - ₹${item.price} x ${item.quantity} = ₹${(item.price * item.quantity).toFixed(2)}`).join('\n')}
+\nSubtotal: ₹${totalPrice.toFixed(2)}
+\nShipping: ₹${shippingCost.toFixed(2)}
+\n*Total: ₹${grandTotal.toFixed(2)}*
+\n*Customer Details:*
+Name: ${values.customerName}
+Phone: ${values.customerPhone}
+Email: ${values.customerEmail}
+Address: ${values.customerAddress}
+    `;
 
-    message += `\nSubtotal: ₹${totalPrice.toFixed(2)}`;
-    message += `\nShipping: ₹${shipping.toFixed(2)}`;
-    message += `\n*Total: ₹${grandTotal.toFixed(2)}*\n\n`;
-
-    message += `*Customer Details:*\n`;
-    message += `Name: ${name}\n`;
-    message += `Phone: ${phone}\n`;
-    message += `Email: ${email}\n`;
-    message += `Address: ${address}\n`;
-
-    const encodedMessage = encodeURIComponent(message);
-    const phoneNumber = "919926414328"; // Replace with your business number
+    const encodedMessage = encodeURIComponent(message.trim());
+    const phoneNumber = '919926414328';
     return `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
   };
 
@@ -69,37 +66,30 @@ const ShopCart = () => {
       customerAddress: Yup.string().required('Address is required'),
     }),
     onSubmit: (values) => {
-      const link = generateWhatsAppLink(
-        cartItems,
-        totalPrice,
-        values.customerName,
-        values.customerPhone,
-        values.customerAddress,
-        values.customerEmail
-      );
+      const link = generateWhatsAppLink(values);
       window.open(link, '_blank');
     },
   });
 
-  const handleUpdateQuantity = (id: string, quantity: number) => {
+  const handleUpdateQuantity = useCallback((id: string, quantity: number) => {
     dispatch(updateQuantity({ id, quantity }));
-  };
+  }, [dispatch]);
 
-  const handleRemoveItem = (id: string) => {
+  const handleRemoveItem = useCallback((id: string) => {
     dispatch(removeFromCart(id));
-  };
+  }, [dispatch]);
+
+  const inputClass =
+    "w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-300";
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-white shadow-lg rounded-lg mt-10">
-      <h2 className="text-2xl font-bold text-orange-400 mb-4 text-center">
-        Shopping Cart
-      </h2>
+    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10">
+      <h2 className="text-2xl font-bold text-orange-400 mb-4 text-center">Shopping Cart</h2>
 
       {cartItems.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-gray-500 mb-4">Your cart is empty.</p>
-          <Link href="/products"
-            className="bg-orange-400 text-white px-6 py-2 rounded-md hover:bg-orange-300 transition">
+          <Link href="/products" className="bg-orange-400 text-white px-6 py-2 rounded-md hover:bg-orange-300 transition">
             Continue Shopping
           </Link>
         </div>
@@ -107,15 +97,8 @@ const ShopCart = () => {
         <>
           <div className="space-y-4">
             {cartItems.map((item) => (
-              <div
-                key={item._id}
-                className="flex flex-col sm:flex-row items-center border-b pb-4 gap-4"
-              >
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-24 h-24 sm:w-20 sm:h-20 rounded-md object-cover"
-                />
+              <div key={item._id} className="flex flex-col sm:flex-row items-center border-b pb-4 gap-4">
+                <img src={item.image} alt={item.name} className="w-24 h-24 sm:w-20 sm:h-20 rounded-md object-cover" />
                 <div className="flex-1 text-center sm:text-left">
                   <h3 className="text-lg font-semibold">{item.name}</h3>
                   <p className="text-sm text-gray-600">₹{item.price.toFixed(2)}</p>
@@ -135,8 +118,8 @@ const ShopCart = () => {
                     +
                   </button>
                 </div>
-                <div className="text-right">
-                  <p className="font-medium">₹{(item.price * item.quantity).toFixed(2)}</p>
+                <div className="text-right font-medium">
+                  ₹{(item.price * item.quantity).toFixed(2)}
                 </div>
                 <button
                   className="text-red-500 hover:text-red-400 transition"
@@ -158,11 +141,11 @@ const ShopCart = () => {
             </div>
             <div className="flex justify-between mb-2">
               <span>Shipping</span>
-              <span>₹{totalPrice > 0 ? '50.00' : '0.00'}</span>
+              <span>₹{shippingCost.toFixed(2)}</span>
             </div>
             <div className="flex justify-between font-bold text-lg">
               <span>Total</span>
-              <span>₹{totalPrice > 0 ? (totalPrice + 50).toFixed(2) : '0.00'}</span>
+              <span>₹{grandTotal.toFixed(2)}</span>
             </div>
           </div>
 
@@ -176,11 +159,12 @@ const ShopCart = () => {
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               disabled
-              className="w-full border px-4 py-2 rounded-md bg-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className={`${inputClass} bg-gray-200 text-gray-500`}
             />
             {formik.touched.customerName && formik.errors.customerName && (
               <div className="text-red-500 text-sm">{formik.errors.customerName}</div>
             )}
+
             <input
               type="tel"
               name="customerPhone"
@@ -188,11 +172,12 @@ const ShopCart = () => {
               value={formik.values.customerPhone}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className={inputClass}
             />
             {formik.touched.customerPhone && formik.errors.customerPhone && (
               <div className="text-red-500 text-sm">{formik.errors.customerPhone}</div>
             )}
+
             <input
               type="email"
               name="customerEmail"
@@ -201,18 +186,19 @@ const ShopCart = () => {
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               disabled
-              className="w-full border px-4 py-2 rounded-md bg-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className={`${inputClass} bg-gray-200 text-gray-500`}
             />
             {formik.touched.customerEmail && formik.errors.customerEmail && (
               <div className="text-red-500 text-sm">{formik.errors.customerEmail}</div>
             )}
+
             <textarea
               name="customerAddress"
               placeholder="Delivery Address"
               value={formik.values.customerAddress}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className={inputClass}
             />
             {formik.touched.customerAddress && formik.errors.customerAddress && (
               <div className="text-red-500 text-sm">{formik.errors.customerAddress}</div>
