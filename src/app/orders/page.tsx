@@ -9,6 +9,7 @@ interface CartItem {
   name: string;
   quantity: number;
   price: number;
+  image: string; // ✨ Added "image" field based on your cartItems schema
 }
 
 interface Order {
@@ -21,16 +22,15 @@ interface Order {
   totalPrice: number;
   shippingCost: number;
   grandTotal: number;
+  status: 'Pending' | 'Shipped' | 'Delivered' | 'Cancelled'; // ✨ Made "status" required and specific
   createdAt: string;
-  status?: string;
 }
 
-const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-200 text-yellow-800',
-  shipped: 'bg-blue-200 text-blue-800',
-  delivered: 'bg-green-200 text-green-800',
-  cancelled: 'bg-red-200 text-red-800',
-  default: 'bg-gray-200 text-gray-800',
+const statusColors: Record<Order['status'], string> = {
+  Pending: 'bg-yellow-200 text-yellow-800',
+  Shipped: 'bg-blue-200 text-blue-800',
+  Delivered: 'bg-green-200 text-green-800',
+  Cancelled: 'bg-red-200 text-red-800',
 };
 
 const OrdersPage = () => {
@@ -60,8 +60,8 @@ const OrdersPage = () => {
     fetchOrders();
   }, [user]);
 
-  const getStatusColor = (status = 'pending') =>
-    statusColors[status.toLowerCase()] || statusColors.default;
+  const getStatusColor = (status: Order['status']) =>
+    statusColors[status] || 'bg-gray-200 text-gray-800';
 
   if (loading) {
     return (
@@ -88,7 +88,7 @@ const OrdersPage = () => {
                 <div
                   className={`absolute top-2 right-2 px-3 py-1 text-xs rounded-full font-semibold ${getStatusColor(order.status)}`}
                 >
-                  {order.status ?? 'Pending'}
+                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                 </div>
 
                 <div className="mb-4">
@@ -99,7 +99,6 @@ const OrdersPage = () => {
                     Placed on: {new Date(order.createdAt).toLocaleDateString()}
                   </p>
                 </div>
-
 
                 <div className="mb-4 text-sm text-gray-700 space-y-1">
                   <p><span className="font-semibold">Name:</span> {order.customerName}</p>

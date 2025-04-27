@@ -1,6 +1,6 @@
 // File: /app/api/products/route.ts
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db"; // You'll need to create this
+import { connectDB } from "@/utils/db"; // You'll need to create this
 import Product from "@/models/Product"; // You'll need to create this
 
 // GET - Fetch all products

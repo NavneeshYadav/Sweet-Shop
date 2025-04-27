@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectDB } from '@/lib/db'; // You should have a db.ts for MongoDB connection
+import { connectDB } from '@/utils/db'; // You should have a db.ts for MongoDB connection
 import Order from '@/models/Order';    // Create an Order model
 
 export async function GET() {

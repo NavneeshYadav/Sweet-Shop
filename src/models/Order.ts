@@ -18,6 +18,11 @@ const orderSchema = new Schema({
   totalPrice: Number,
   shippingCost: Number,
   grandTotal: Number,
+  status: {
+    type: String,
+    enum: ['pending', 'shipped', 'delivered', 'cancelled'],
+    default: 'pending'
+  },
   createdAt: { type: Date, default: Date.now }
 });
 
