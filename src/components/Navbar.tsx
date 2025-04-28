@@ -1,26 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, ShoppingCart, X } from 'lucide-react';
 import { useAppSelector } from '../store/hooks';
-import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'; // ✨ Import Clerk components
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton, useUser } from '@clerk/nextjs'; // ✨ useUser added
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const cartItems = useAppSelector(state => state.cart.items);
+  const { user } = useUser(); // ✨ Get user from Clerk
 
   const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
+  // ✨ Check if user is admin (assume 'role' is stored in publicMetadata)
+  const isAdmin = useMemo(() => {
+    return user?.publicMetadata?.role === 'admin';
+  }, [user]);
+
   const mainLinks = [
     { navId: 1, name: 'Home', href: '/' },
     { navId: 2, name: 'Products', href: '/products' },
     { navId: 3, name: 'About', href: '/about' },
-    { navId: 4, name: 'Admin', href: '/admin' },
+    ...(isAdmin ? [{ navId: 4, name: 'Admin', href: '/admin' }] : []), // ✨ Only add Admin if user is admin
   ];
 
   return (
@@ -79,8 +85,6 @@ const Navbar = () => {
                 <UserButton afterSignOutUrl="/" />
               </div>
             </SignedIn>
-
-
           </div>
 
           {/* Mobile Menu Button */}
