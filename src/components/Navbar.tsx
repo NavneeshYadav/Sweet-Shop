@@ -69,18 +69,17 @@ const Navbar = () => {
             </SignedOut>
 
             <SignedIn>
-              <div className="flex flex-col space-y-2">
+              <div className="flex items-center space-x-4">
                 <Link
                   href="/orders"
-                  className="text-orange-400 hover:text-orange-300 py-2 text-center"
+                  className="text-orange-400 hover:text-orange-300 transition"
                 >
                   My Orders
                 </Link>
-                <div className="flex justify-center">
-                  <UserButton afterSignOutUrl="/" />
-                </div>
+                <UserButton afterSignOutUrl="/" />
               </div>
             </SignedIn>
+
 
           </div>
 
@@ -134,7 +133,13 @@ const Navbar = () => {
           </SignedOut>
 
           <SignedIn>
-            <div className="flex justify-center">
+            <Link
+              href="/orders"
+              className="text-orange-400 hover:text-orange-300 py-2 text-center"
+            >
+              My Orders
+            </Link>
+            <div className="flex justify-start mt-2">
               <UserButton afterSignOutUrl="/" />
             </div>
           </SignedIn>

@@ -61,7 +61,7 @@ const OrdersPage = () => {
   }, [user]);
 
   const getStatusColor = (status: Order['status']) =>
-    statusColors[status] || 'bg-gray-200 text-gray-800';
+    statusColors[status] || 'bg-yellow-200 text-yellow-800';
 
   if (loading) {
     return (
