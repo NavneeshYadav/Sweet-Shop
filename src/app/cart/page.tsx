@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useUser } from '@clerk/clerk-react';
-
+import { useRouter } from 'next/navigation';
 export interface CartItem {
   _id: string;
   name: string;
@@ -17,6 +17,7 @@ export interface CartItem {
 }
 
 const ShopCart = () => {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const cartItems = useAppSelector((state) => state.cart.items);
   const { user } = useUser();
@@ -240,7 +241,15 @@ Address: ${values.customerAddress}
                 Continue Shopping
               </Link>
               <button
-                type="submit"
+                type="button"
+                onClick={() => {
+                  if (!user) {
+                    alert('Please sign in to proceed to checkout.');
+                    router.push('/sign-in');
+                  } else {
+                    formik.handleSubmit();
+                  }
+                }}
                 className="bg-orange-400 text-white px-6 py-2 rounded-md hover:bg-orange-300 transition w-full sm:w-auto text-center"
               >
                 Proceed to Checkout
