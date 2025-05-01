@@ -64,10 +64,10 @@ const Navbar = () => {
 
             {/* Clerk Authentication */}
             <SignedOut>
-              <SignInButton mode="modal">
+              <SignInButton>
                 <button className="text-orange-400 hover:text-orange-300 transition">Login</button>
               </SignInButton>
-              <SignUpButton mode="modal">
+              <SignUpButton>
                 <button className="bg-orange-400 text-white px-4 py-1.5 rounded-md hover:bg-orange-300 transition">
                   Signup
                 </button>
@@ -125,10 +125,10 @@ const Navbar = () => {
           {/* Mobile Clerk Auth */}
           <SignedOut>
             <div className="flex flex-col space-y-2">
-              <SignInButton mode="modal">
+              <SignInButton>
                 <button className="text-orange-400 hover:text-orange-300">Login</button>
               </SignInButton>
-              <SignUpButton mode="modal">
+              <SignUpButton>
                 <button className="bg-orange-400 text-white rounded-md py-2 hover:bg-orange-300">
                   Signup
                 </button>
