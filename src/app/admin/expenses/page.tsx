@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, Download } from 'lucide-react';
-import AddEntryModal from '@/components/AddEntryModel';
+import { Plus, Download, Edit, Trash2 } from 'lucide-react';
+import EntryModal from '@/components/EntryModal';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
 interface Transaction {
   id: number;
   type: 'Earning' | 'Expense';
@@ -14,17 +15,64 @@ interface Transaction {
 }
 
 const ExpensesPage = () => {
-
   const [isModalOpen, setModalOpen] = useState(false);
-  const [transactions, setTransactions] = useState<Transaction[]>([{ id: 1, type: 'Earning', description: 'Online Order', category: 'Sales', amount: 5000, date: '2025-04-01' },
-  { id: 2, type: 'Expense', description: 'Packaging Material', category: 'Supplies', amount: 800, date: '2025-04-03' },]);
+  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  
+  const [transactions, setTransactions] = useState<Transaction[]>([
+    { id: 1, type: 'Earning', description: 'Online Order', category: 'Sales', amount: 5000, date: '2025-04-01' },
+    { id: 2, type: 'Expense', description: 'Packaging Material', category: 'Supplies', amount: 800, date: '2025-04-03' },
+  ]);
+
   const handleAddEntry = (newEntry: Omit<Transaction, 'id'>) => {
     setTransactions(prev => [...prev, { ...newEntry, id: prev.length + 1 }]); // Replace this with API later
+  };
+
+  const handleEditEntry = (updatedTransaction: Transaction) => {
+    setTransactions(prev => 
+      prev.map(transaction => 
+        transaction.id === updatedTransaction.id ? updatedTransaction : transaction
+      )
+    );
+  };
+
+  const handleDeleteEntry = () => {
+    if (selectedTransaction) {
+      setTransactions(prev => 
+        prev.filter(transaction => transaction.id !== selectedTransaction.id)
+      );
+    }
+  };
+
+  const openAddModal = () => {
+    setSelectedTransaction(null);
+    setModalMode('add');
+    setModalOpen(true);
+  };
+
+  const openEditModal = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setModalMode('edit');
+    setModalOpen(true);
+  };
+
+  const handleSubmit = (values: any) => {
+    if (modalMode === 'add') {
+      handleAddEntry(values);
+    } else {
+      handleEditEntry(values as Transaction);
+    }
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedTransaction(null);
   };
 
   const totalEarnings = transactions.filter(t => t.type === 'Earning').reduce((acc, t) => acc + t.amount, 0);
   const totalExpenses = transactions.filter(t => t.type === 'Expense').reduce((acc, t) => acc + t.amount, 0);
   const netProfit = totalEarnings - totalExpenses;
+  
   const groupedMap: { [date: string]: { date: string; Earning: number; Expense: number } } = {};
 
   transactions.forEach((txn) => {
@@ -38,7 +86,6 @@ const ExpensesPage = () => {
   });
 
   const groupedData = Object.values(groupedMap);
-
 
   return (
     <div className='min-h-screen bg-gray-50'>
@@ -84,6 +131,7 @@ const ExpensesPage = () => {
                 <th className="p-3 text-left">Description</th>
                 <th className="p-3 text-left">Category</th>
                 <th className="p-3 text-left">Amount</th>
+                <th className="p-3 text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -94,6 +142,17 @@ const ExpensesPage = () => {
                   <td className="p-3">{txn.description}</td>
                   <td className="p-3">{txn.category}</td>
                   <td className="p-3 font-semibold">₹{txn.amount}</td>
+                  <td className="p-3">
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => openEditModal(txn)} 
+                        className="text-blue-600 hover:text-blue-800"
+                        title="Edit entry"
+                      >
+                        <Edit size={18} />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -103,17 +162,11 @@ const ExpensesPage = () => {
         {/* Add Entry Button */}
         <div className="mt-6">
           <button
-            onClick={() => setModalOpen(true)}
+            onClick={openAddModal}
             className="bg-orange-500 text-white px-5 py-3 rounded-lg flex items-center gap-2 hover:bg-orange-600 transition"
           >
             <Plus size={20} /> Add Entry
           </button>
-          <AddEntryModal
-            isOpen={isModalOpen}
-            onClose={() => setModalOpen(false)}
-            onSubmit={handleAddEntry}
-          />
-
         </div>
 
         {/* Charts Placeholder */}
@@ -133,8 +186,17 @@ const ExpensesPage = () => {
           </div>
         </div>
       </div>
-    </div>
 
+      {/* Single Modal for Add/Edit/Delete */}
+      <EntryModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onSubmit={handleSubmit}
+        onDelete={handleDeleteEntry}
+        mode={modalMode}
+        entry={selectedTransaction}
+      />
+    </div>
   );
 };
 
