@@ -212,7 +212,8 @@ const handleProductImageChange = async (
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 mt-6">
+    <div className="min-h-screen bg-gray-50">
+ <div className="max-w-7xl mx-auto px-4 mt-6">
       <h2 className="text-2xl font-bold text-orange-600 mb-4">Manage Products</h2>
 
       <button
@@ -350,6 +351,8 @@ const handleProductImageChange = async (
         </div>
       )}
     </div>
+    </div>
+   
   );
 };
 
