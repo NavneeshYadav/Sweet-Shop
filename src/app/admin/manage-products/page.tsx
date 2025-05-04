@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import ProductAdminCard from "@/components/ProductAdminCard";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-
+import { toast } from 'react-toastify';
 interface Product {
   _id?: string;
   name: string;
@@ -99,14 +99,18 @@ const ProductAdminList: React.FC = () => {
             resetForm();
             setImagePreview(null);
             setShowForm(false);
+            toast.success(`Product Added Successfully ${productData.name}!`);
           } else {
             console.error("Failed to create product");
+            toast.error(`Failed to Added Product ${productData.name}!`);
           }
         } else {
           console.error("Image upload failed", uploadData.error);
+          toast.error(`Failed to upload image!`);
         }
       } catch (error) {
         console.error("Error in submission process:", error);
+        toast.error(`Error in submission process!`);
       } finally {
         setLoading(false);
       }
