@@ -21,6 +21,7 @@ const ExpensesPage = () => {
   const [typeFilter, setTypeFilter] = useState<'All' | 'Earning' | 'Expense'>('All');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [selectedMonth, setSelectedMonth] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<string>(''); // State for selected date
 
   const [transactions, setTransactions] = useState<Transaction[]>([
     { id: 1, type: 'Earning', description: 'Online Order', category: 'Sales', amount: 5000, date: '2025-04-01' },
@@ -76,12 +77,14 @@ const ExpensesPage = () => {
     setTypeFilter('All');
     setCategoryFilter('');
     setSelectedMonth('');
+    setSelectedDate(''); // Reset selected date
   };
 
   const filteredTransactions = transactions.filter(t => {
     if (typeFilter !== 'All' && t.type !== typeFilter) return false;
     if (categoryFilter && t.category !== categoryFilter) return false;
     if (selectedMonth && !t.date.startsWith(selectedMonth)) return false;
+    if (selectedDate && t.date !== selectedDate) return false; // Filter by selected date
     return true;
   });
 
@@ -112,6 +115,10 @@ const ExpensesPage = () => {
     a.setAttribute('download', `transactions-${new Date().toISOString().split('T')[0]}.csv`);
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleSelectDate = (date: string) => {
+    setSelectedDate(date); // Update the selected date state
   };
 
   return (
@@ -182,7 +189,7 @@ const ExpensesPage = () => {
         </div>
 
         {/* Active Filters */}
-        {(typeFilter !== 'All' || categoryFilter || selectedMonth) && (
+        {(typeFilter !== 'All' || categoryFilter || selectedMonth || selectedDate) && (
           <div className="flex flex-wrap gap-2 mb-4">
             <div className="text-sm text-gray-600">Active filters:</div>
             {typeFilter !== 'All' && (
@@ -198,6 +205,11 @@ const ExpensesPage = () => {
             {selectedMonth && (
               <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                 Month: {selectedMonth}
+              </span>
+            )}
+            {selectedDate && (
+              <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full">
+                Date: {selectedDate}
               </span>
             )}
           </div>
@@ -219,7 +231,11 @@ const ExpensesPage = () => {
             <tbody>
               {filteredTransactions.length > 0 ? (
                 filteredTransactions.map((txn) => (
-                  <tr key={txn.id} className="border-t">
+                  <tr
+                    key={txn.id}
+                    className="border-t cursor-pointer"
+                    onClick={() => handleSelectDate(txn.date)} // Click on a row to filter by date
+                  >
                     <td className="p-3">{txn.date}</td>
                     <td className={`p-3 ${txn.type === 'Earning' ? 'text-green-600' : 'text-red-600'}`}>{txn.type}</td>
                     <td className="p-3">{txn.description}</td>
