@@ -20,7 +20,7 @@ const ExpensesPage = () => {
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [typeFilter, setTypeFilter] = useState<'All' | 'Earning' | 'Expense'>('All');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
-  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedMonth, setSelectedMonth] = useState<string>('');
 
   const [transactions, setTransactions] = useState<Transaction[]>([
     { id: 1, type: 'Earning', description: 'Online Order', category: 'Sales', amount: 5000, date: '2025-04-01' },
@@ -30,8 +30,6 @@ const ExpensesPage = () => {
   ]);
 
   const categories = Array.from(new Set(transactions.map(t => t.category)));
-
-  const resetDateFilter = () => setSelectedDate('');
 
   const handleAddEntry = (newEntry: Omit<Transaction, 'id'>) => {
     setTransactions(prev => [...prev, { ...newEntry, id: prev.length + 1 }]);
@@ -74,10 +72,16 @@ const ExpensesPage = () => {
     setSelectedTransaction(null);
   };
 
+  const handleClearFilters = () => {
+    setTypeFilter('All');
+    setCategoryFilter('');
+    setSelectedMonth('');
+  };
+
   const filteredTransactions = transactions.filter(t => {
     if (typeFilter !== 'All' && t.type !== typeFilter) return false;
     if (categoryFilter && t.category !== categoryFilter) return false;
-    if (selectedDate && t.date !== selectedDate) return false;
+    if (selectedMonth && !t.date.startsWith(selectedMonth)) return false;
     return true;
   });
 
@@ -134,19 +138,11 @@ const ExpensesPage = () => {
         <div className="flex flex-wrap gap-4 mb-4">
           <div className="flex items-center gap-2">
             <input
-              type="date"
+              type="month"
               className="border px-3 py-2 rounded-md"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
             />
-            {selectedDate && (
-              <button
-                onClick={resetDateFilter}
-                className="bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded text-sm"
-              >
-                Clear
-              </button>
-            )}
           </div>
 
           <select
@@ -176,10 +172,17 @@ const ExpensesPage = () => {
           >
             <Download size={16} /> Export
           </button>
+
+          <button
+            onClick={handleClearFilters}
+            className="bg-gray-500 text-white px-4 py-2 rounded-md"
+          >
+            Clear All Filters
+          </button>
         </div>
 
         {/* Active Filters */}
-        {(typeFilter !== 'All' || categoryFilter || selectedDate) && (
+        {(typeFilter !== 'All' || categoryFilter || selectedMonth) && (
           <div className="flex flex-wrap gap-2 mb-4">
             <div className="text-sm text-gray-600">Active filters:</div>
             {typeFilter !== 'All' && (
@@ -192,9 +195,9 @@ const ExpensesPage = () => {
                 Category: {categoryFilter}
               </span>
             )}
-            {selectedDate && (
+            {selectedMonth && (
               <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                Date: {selectedDate}
+                Month: {selectedMonth}
               </span>
             )}
           </div>
