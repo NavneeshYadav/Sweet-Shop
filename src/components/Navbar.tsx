@@ -35,7 +35,9 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-20">
           {/* Left side - Main Links */}
           <div className="flex items-center space-x-8">
-            <div className="text-xl font-bold text-orange-400">Lalu Cake Wale</div>
+            <Link href="/" className="text-xl font-bold text-orange-400 hover:text-orange-300 transition">
+              Lalu Cake Wale
+            </Link>
             <div className="hidden md:flex space-x-6">
               {mainLinks.map((link) => (
                 <Link
