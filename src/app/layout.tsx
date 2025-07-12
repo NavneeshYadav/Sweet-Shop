@@ -6,7 +6,8 @@ import { ReduxProvider } from '../providers/ReduxProvider';
 import {
   ClerkProvider,
 } from '@clerk/nextjs'
-
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -35,6 +36,7 @@ export default function RootLayout({
         >
           <ReduxProvider>
             <Navbar />
+            <ToastContainer position="top-center" autoClose={3000} />
             {children}
           </ReduxProvider>
         </body>
