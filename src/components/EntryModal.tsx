@@ -59,7 +59,7 @@ const EntryModal = ({ isOpen, onClose, onSubmit, onDelete, mode, entry }: Props)
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center">
+    <Dialog open={isOpen} onClose={onClose} className="fixed inset-0 mx-2 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/25" aria-hidden="true" />
       <div className="relative bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
         {!showDeleteConfirm ? (
