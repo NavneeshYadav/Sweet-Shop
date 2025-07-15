@@ -88,7 +88,7 @@ export async function PUT(
 // DELETE a product
 export async function DELETE(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await context.params;
