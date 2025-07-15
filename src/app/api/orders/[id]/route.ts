@@ -3,8 +3,8 @@ import { connectDB } from '@/utils/db';
 import Order from '@/models/Order';
 
 // Dynamic route handler for PUT
-export async function PUT(req: NextRequest, context: { params: { id: string } }) {
-  const { id } = context.params; // Remove 'await' here
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params; // params is now a Promise in Next.js 15
   const body = await req.json();
 
   if (!id) {
