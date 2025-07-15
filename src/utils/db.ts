@@ -8,11 +8,12 @@ if (!MONGODB_URI) {
 
 // Extend the global object type to store mongoose connection
 declare global {
+  // eslint-disable-next-line no-var
   var mongooseCache: { conn: mongoose.Connection | null; promise: Promise<mongoose.Connection> | null };
 }
 
 // Use globalThis to avoid TypeScript errors
-let cached = globalThis.mongooseCache || { conn: null, promise: null };
+const cached = globalThis.mongooseCache || { conn: null, promise: null };
 
 export async function connectDB() {
   if (cached.conn) return cached.conn;
