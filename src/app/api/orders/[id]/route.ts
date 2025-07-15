@@ -4,7 +4,7 @@ import Order from '@/models/Order';
 
 // Dynamic route handler for PUT
 export async function PUT(req: NextRequest, context: { params: { id: string } }) {
-  const { id } = await context.params;
+  const { id } = context.params; // Remove 'await' here
   const body = await req.json();
 
   if (!id) {
