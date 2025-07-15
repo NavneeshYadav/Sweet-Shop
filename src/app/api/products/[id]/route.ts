@@ -14,7 +14,7 @@ cloudinary.config({
 // GET a single product
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await context.params;
@@ -41,7 +41,7 @@ export async function GET(
 // UPDATE a product
 export async function PUT(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await context.params;
