@@ -127,6 +127,7 @@ const ExpensesPage = () => {
   }, []);
 
   const handleSubmit = useCallback((values: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     modalMode === 'add' ? handleAddEntry(values) : handleEditEntry(values as Transaction);
     setModalOpen(false);
   }, [modalMode, handleAddEntry, handleEditEntry]);
