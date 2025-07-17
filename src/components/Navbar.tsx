@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, ShoppingCart, X } from 'lucide-react';
@@ -14,6 +14,27 @@ const Navbar = () => {
   const { user } = useUser(); // ✨ Get user from Clerk
 
   const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -39,16 +60,24 @@ const Navbar = () => {
               Lalu Cake Wale
             </Link>
             <div className="hidden md:flex space-x-6">
-              {mainLinks.map((link) => (
+              {mainLinks.map(link => (
                 <Link
                   key={link.navId}
                   href={link.href}
-                  className={`transition ${pathname === link.href ? 'text-orange-600 font-semibold' : 'text-orange-400 hover:text-orange-300'}`}
+                  className={`transition ${link.href === '/'
+                    ? pathname === '/'
+                      ? 'text-orange-600 font-semibold'
+                      : 'text-orange-400 hover:text-orange-300'
+                    : pathname.startsWith(link.href)
+                      ? 'text-orange-600 font-semibold'
+                      : 'text-orange-400 hover:text-orange-300'
+                    }`}
                 >
                   {link.name}
                 </Link>
               ))}
             </div>
+
           </div>
 
           {/* Right side - Cart Icon and Auth */}
@@ -80,10 +109,11 @@ const Navbar = () => {
               <div className="flex items-center space-x-4">
                 <Link
                   href="/orders"
-                  className="text-orange-400 hover:text-orange-300 transition"
+                  className={`transition ${pathname === '/orders' ? 'text-orange-600 font-semibold' : 'text-orange-400 hover:text-orange-300'}`}
                 >
                   My Orders
                 </Link>
+
                 <UserButton afterSignOutUrl="/" />
               </div>
             </SignedIn>
@@ -112,16 +142,25 @@ const Navbar = () => {
 
       {/* Mobile Dropdown */}
       {isOpen && (
-        <div className="md:hidden px-4 pb-4 space-y-2 transition-all duration-300 ease-in-out">
+        <div className="md:hidden px-4 pb-4 space-y-2 transition-all duration-300 ease-in-out" ref={mobileMenuRef}>
           {mainLinks.map((link) => (
             <Link
               key={link.navId}
               href={link.href}
-              className={`block py-2 transition ${pathname === link.href ? 'text-orange-600 font-semibold' : 'text-orange-400 hover:text-orange-300'}`}
+              className={`block py-2 transition ${link.href === '/'
+                  ? pathname === '/'
+                    ? 'text-orange-600 font-semibold'
+                    : 'text-orange-400 hover:text-orange-300'
+                  : pathname.startsWith(link.href)
+                    ? 'text-orange-600 font-semibold'
+                    : 'text-orange-400 hover:text-orange-300'
+                }`}
+              onClick={() => setIsOpen(false)}
             >
               {link.name}
             </Link>
           ))}
+
           <hr className="border-gray-200" />
 
           {/* Mobile Clerk Auth */}
@@ -141,7 +180,8 @@ const Navbar = () => {
           <SignedIn>
             <Link
               href="/orders"
-              className="text-orange-400 hover:text-orange-300 py-2 text-center"
+              className={`block py-2 transition ${pathname === '/orders' ? 'text-orange-600 font-semibold' : 'text-orange-400 hover:text-orange-300'}`}
+              onClick={() => setIsOpen(false)}
             >
               My Orders
             </Link>
