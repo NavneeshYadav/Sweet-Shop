@@ -70,7 +70,7 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
         }
       };
       fileReader.readAsDataURL(file);
-      
+
       // Handle the actual upload via the provided onImage function
       onImage(e, (url: string, publicId: string) => {
         formik.setFieldValue("image", url);
@@ -81,7 +81,7 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
 
   const handleDelete = async () => {
     if (!product._id) return;
-    
+
     if (window.confirm("Are you sure you want to delete this product?")) {
       setDeleteLoading(true);
       try {
@@ -181,6 +181,8 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
           >
             <option value="sweet product">Sweet Product</option>
             <option value="namkeen product">Namkeen Product</option>
+            <option value="dairy product">Dairy Product</option>
+            <option value="bakery product">Bakery Product</option>
             <option value="other">Other</option>
           </select>
           {formik.touched.category && formik.errors.category && (
@@ -218,8 +220,8 @@ const ProductAdminCard: React.FC<ProductAdminProps> = ({ product, onUpdate, onDe
           </p>
 
           <div className="flex gap-2 mt-3">
-            <button 
-              onClick={() => setIsEditing(true)} 
+            <button
+              onClick={() => setIsEditing(true)}
               className="bg-blue-500 text-white px-4 py-2 rounded-md"
             >
               Edit

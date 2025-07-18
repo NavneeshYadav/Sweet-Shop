@@ -50,7 +50,7 @@ const ProductList: React.FC = () => {
       (priceFilter !== null ? product.price <= priceFilter : true) &&
       (categoryFilter ? product.category.toLowerCase() === categoryFilter.toLowerCase() : true) &&
       (availabilityFilter === "inStock" ? product.availableInStocks :
-       availabilityFilter === "outOfStock" ? !product.availableInStocks : true) // ✅ NEW
+        availabilityFilter === "outOfStock" ? !product.availableInStocks : true) // ✅ NEW
     );
   }, [products, searchTerm, priceFilter, categoryFilter, availabilityFilter]); // ✅ NEW
 
@@ -98,6 +98,8 @@ const ProductList: React.FC = () => {
           <option value="">All Categories</option>
           <option value="sweet product">Sweet</option>
           <option value="namkeen product">Namkeen</option>
+          <option value="dairy product">Dairy</option>
+          <option value="bakery product">Bakery</option>
           <option value="other">Other</option>
         </select>
         <select

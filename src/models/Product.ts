@@ -37,7 +37,7 @@ const ProductSchema: Schema = new Schema(
     category: {
       type: String,
       required: [true, "Please provide a product category"],
-      enum: ["sweet product", "namkeen product", "other"],
+      enum: ["sweet product", "namkeen product", "dairy product", "bakery product", "other"],
     },
   },
   {
